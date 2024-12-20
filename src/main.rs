@@ -1,3 +1,5 @@
+use prettytable::{row, Table};
+
 struct Position {
     name: String,
     amount: f64,
@@ -43,29 +45,35 @@ fn get_position_info() -> Position {
         name,
         amount,
         value,
-        buy_price: (value / amount),
+        buy_price: value / amount,
         sell_price: 0f64,
         income: 0f64,
     }
 }
 
 fn show_positions_table(positions: Vec<Position>) {
-    println!(
-        "{0: <10} | {1: <10} | {2: <10} | {3: <18} | {4: <10} | {5: <10} |",
-        "Name", "Amount", "Value", "Buy price", "Sell price", "Income"
-    );
+    let mut table = Table::new();
+    table.add_row(row![
+        "Name",
+        "Amount",
+        "Value",
+        "Buy price",
+        "Sell price",
+        "Income"
+    ]);
 
     positions.iter().for_each(|position| {
-        println!(
-            "{0: <10} | {1: <10} | {2: <10} | {3: <10} | {4: <10} | {5: <10} |",
+        table.add_row(row![
             position.name,
             position.amount,
             position.value,
             position.buy_price,
             position.sell_price,
-            position.income
-        )
+            position.income,
+        ]);
     });
+
+    table.printstd();
 }
 
 fn main() {
