@@ -1,5 +1,9 @@
 use prettytable::{row, Table};
 
+pub mod utils;
+
+use utils::math::round;
+
 struct Position {
     name: String,
     amount: f64,
@@ -65,11 +69,11 @@ fn show_positions_table(positions: Vec<Position>) {
     positions.iter().for_each(|position| {
         table.add_row(row![
             position.name,
-            position.amount,
-            position.value,
-            position.buy_price,
-            position.sell_price,
-            position.income,
+            round(position.amount).unwrap(),
+            round(position.value).unwrap(),
+            round(position.buy_price).unwrap(),
+            round(position.sell_price).unwrap(),
+            round(position.income).unwrap(),
         ]);
     });
 
