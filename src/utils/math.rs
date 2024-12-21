@@ -21,18 +21,18 @@ pub fn round(number: f64) -> Result<f64, String> {
         return Ok(round::round(number, 0));
     }
 
-    if int_part.len() >= 1 {
+    if int_part.len() > 1 {
         return Ok(round::round(number, 4));
     }
 
     let mut zeros_count = 0;
-    for digit_char in fractional_part.split("") {
-        if digit_char == "0" {
+    for digit_char in fractional_part.chars() {
+        if digit_char == '0' {
             zeros_count += 1;
         } else {
             break;
         }
     }
 
-    Ok(round::round(number, zeros_count + 2))
+    Ok(round::round(number, zeros_count + 4))
 }
