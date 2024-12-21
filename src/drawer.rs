@@ -49,6 +49,40 @@ impl Drawer {
         self.draw_page_counter();
     }
 
+    pub fn draw_single_position(&self, id: i32) -> Result<(), String> {
+        let position_option = self.positions.iter().find(|pos| pos.id == id);
+        if position_option.is_none() {
+            return Err(format!("Position with id {} not found", id));
+        }
+
+        let position = position_option.unwrap();
+
+        let mut table = Table::new();
+        table.add_row(row![
+            "Id",
+            "Name",
+            "Amount",
+            "Value",
+            "Buy price",
+            "Sell price",
+            "Income"
+        ]);
+
+        table.add_row(row![
+            position.id,
+            position.name,
+            round(position.amount).unwrap(),
+            round(position.value).unwrap(),
+            round(position.buy_price).unwrap(),
+            round(position.sell_price).unwrap(),
+            round(position.income).unwrap(),
+        ]);
+
+        table.printstd();
+
+        Ok(())
+    }
+
     pub fn previous_page(&mut self) -> Result<(), String> {
         if self.page == 1 {
             Err(String::from("Already at first page"))
