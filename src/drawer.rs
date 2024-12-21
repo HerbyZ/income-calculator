@@ -30,8 +30,11 @@ impl Drawer {
             "Income"
         ]);
 
+        let mut reversed_positions = self.positions.clone();
+        reversed_positions.reverse();
+
         let positions_to_draw =
-            select_items_for_page(self.positions.clone(), self.page, ITEMS_PER_PAGE);
+            select_items_for_page(reversed_positions, self.page, ITEMS_PER_PAGE);
 
         positions_to_draw.iter().for_each(|position| {
             table.add_row(row![
