@@ -1,18 +1,9 @@
 pub mod drawer;
+pub mod storage;
 pub mod utils;
 
 use drawer::Drawer;
-
-#[derive(Clone)]
-pub struct Position {
-    id: i32,
-    name: String,
-    amount: f64,
-    value: f64,
-    buy_price: f64,
-    sell_price: f64,
-    income: f64,
-}
+use storage::Position;
 
 pub struct CommandHandler {
     positions: Vec<Position>,
@@ -70,6 +61,10 @@ impl CommandHandler {
         });
         self.drawer.positions = self.positions.clone();
 
+        if let Err(error) = storage::save_positions(self.positions.clone()) {
+            exit_with_error(error);
+        }
+
         Ok(())
     }
 
@@ -81,7 +76,7 @@ impl CommandHandler {
         self.drawer.previous_page()
     }
 
-    fn handle_close_position(&mut self) -> Result<(), String> {
+    pub fn handle_close_position(&mut self) -> Result<(), String> {
         let mut id_input = String::new();
         let mut sell_price_input = String::new();
 
@@ -115,12 +110,30 @@ impl CommandHandler {
         self.positions[pos_index] = position;
         self.drawer.positions = self.positions.clone();
 
+        if let Err(error) = storage::save_positions(self.positions.clone()) {
+            exit_with_error(error);
+        }
+
         Ok(())
     }
 }
 
+fn exit_with_error(error: String) {
+    println!("ERROR: {}", error);
+    std::process::exit(1);
+}
+
 fn main() {
-    let mut command_handler = CommandHandler::new(vec![]);
+    if let Err(error) = storage::initialize_storage() {
+        return exit_with_error(error);
+    }
+
+    let initial_positions = match storage::load_positions() {
+        Ok(positions) => positions,
+        Err(error) => return exit_with_error(error),
+    };
+
+    let mut command_handler = CommandHandler::new(initial_positions);
     let stdin = std::io::stdin();
 
     command_handler.drawer.draw_table();

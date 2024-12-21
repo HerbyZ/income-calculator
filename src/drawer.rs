@@ -1,8 +1,8 @@
 use colored::Colorize;
 use prettytable::{row, Table};
 
+use crate::storage::Position;
 use crate::utils::math::round;
-use crate::Position;
 
 const ITEMS_PER_PAGE: i32 = 10;
 
