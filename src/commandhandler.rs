@@ -123,6 +123,9 @@ impl CommandHandler {
         let id = id_input.trim().parse::<i32>().expect("parse id to i32");
 
         let mut confirmation = String::new();
+        if let Err(error) = self.drawer.draw_single_position(id) {
+            return Err(error);
+        }
         println!("Are you sure want to delete position {}? (y,N)", id);
         stdin
             .read_line(&mut confirmation)
