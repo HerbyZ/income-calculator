@@ -1,10 +1,11 @@
-use prettytable::{row, Table};
-
+pub mod drawer;
 pub mod utils;
 
-use utils::math::round;
+use drawer::Drawer;
 
-struct Position {
+#[derive(Clone)]
+pub struct Position {
+    id: i32,
     name: String,
     amount: f64,
     value: f64,
@@ -13,78 +14,134 @@ struct Position {
     income: f64,
 }
 
-fn get_position_info() -> Position {
-    let mut name_input = String::new();
-    let mut amount_input = String::new();
-    let mut value_input = String::new();
+pub struct CommandHandler {
+    positions: Vec<Position>,
+    pub drawer: Drawer,
+}
 
-    let stdin = std::io::stdin();
+impl CommandHandler {
+    fn new(initial_positions: Vec<Position>) -> CommandHandler {
+        CommandHandler {
+            positions: initial_positions.clone(),
+            drawer: Drawer::new(initial_positions.clone()),
+        }
+    }
 
-    println!("Enter position name:");
-    stdin
-        .read_line(&mut name_input)
-        .expect("Failed to read name");
+    pub fn handle_add_position(&mut self) -> Result<(), String> {
+        let mut name_input = String::new();
+        let mut amount_input = String::new();
+        let mut value_input = String::new();
 
-    println!("Enter position amount:");
-    stdin
-        .read_line(&mut amount_input)
-        .expect("Failed to read amount");
+        let stdin = std::io::stdin();
 
-    println!("Enter position value:");
-    stdin
-        .read_line(&mut value_input)
-        .expect("Failed to read amount");
+        println!("Enter position name:");
+        stdin.read_line(&mut name_input).expect("read name");
 
-    let name = name_input.trim().to_string();
-    let amount = amount_input
-        .trim()
-        .parse::<f64>()
-        .expect("Failed to parse amount to f64");
-    let value = value_input
-        .trim()
-        .parse::<f64>()
-        .expect("Failed to parse amount to f64");
+        println!("Enter position amount:");
+        stdin.read_line(&mut amount_input).expect("read amount");
 
-    Position {
-        name,
-        amount,
-        value,
-        buy_price: value / amount,
-        sell_price: 0f64,
-        income: 0f64,
+        println!("Enter position value:");
+        stdin.read_line(&mut value_input).expect("read value");
+
+        let name = name_input.trim().to_string();
+        let amount = amount_input
+            .trim()
+            .parse::<f64>()
+            .expect("parse amount to f64");
+        let value = value_input
+            .trim()
+            .parse::<f64>()
+            .expect("parse value to f64");
+
+        let id = if let Some(last_position) = self.positions.last() {
+            last_position.id + 1
+        } else {
+            0
+        };
+
+        self.positions.push(Position {
+            id,
+            name,
+            amount,
+            value,
+            buy_price: value / amount,
+            sell_price: 0f64,
+            income: 0f64,
+        });
+        self.drawer.positions = self.positions.clone();
+
+        Ok(())
+    }
+
+    pub fn handle_next_page(&mut self) -> Result<(), String> {
+        self.drawer.next_page()
+    }
+
+    pub fn handle_previous_page(&mut self) -> Result<(), String> {
+        self.drawer.previous_page()
+    }
+
+    fn handle_close_position(&mut self) -> Result<(), String> {
+        let mut id_input = String::new();
+        let mut sell_price_input = String::new();
+
+        let stdin = std::io::stdin();
+
+        println!("Enter position id:");
+        stdin.read_line(&mut id_input).expect("read id input");
+
+        println!("Enter sell price:");
+        stdin
+            .read_line(&mut sell_price_input)
+            .expect("read sell price input");
+
+        let id = id_input.trim().parse::<i32>().expect("parse id to i32");
+        let sell_price = sell_price_input
+            .trim()
+            .parse::<f64>()
+            .expect("parse sell price to f64");
+
+        let pos_index_option = self.positions.iter().position(|pos| pos.id == id);
+        if pos_index_option.is_none() {
+            return Err(format!("Position with id {} not found", id));
+        }
+
+        let pos_index = pos_index_option.unwrap();
+
+        let mut position = self.positions[pos_index].clone();
+        position.sell_price = sell_price;
+        position.income = (sell_price - position.buy_price) * position.amount;
+
+        self.positions[pos_index] = position;
+        self.drawer.positions = self.positions.clone();
+
+        Ok(())
     }
 }
 
-fn show_positions_table(positions: Vec<Position>) {
-    let mut table = Table::new();
-    table.add_row(row![
-        "Name",
-        "Amount",
-        "Value",
-        "Buy price",
-        "Sell price",
-        "Income"
-    ]);
-
-    positions.iter().for_each(|position| {
-        table.add_row(row![
-            position.name,
-            round(position.amount).unwrap(),
-            round(position.value).unwrap(),
-            round(position.buy_price).unwrap(),
-            round(position.sell_price).unwrap(),
-            round(position.income).unwrap(),
-        ]);
-    });
-
-    table.printstd();
-}
-
 fn main() {
-    let mut positions: Vec<Position> = vec![];
+    let mut command_handler = CommandHandler::new(vec![]);
+    let stdin = std::io::stdin();
 
-    let position = get_position_info();
-    positions.push(position);
+    command_handler.drawer.draw_table();
 
-    show_positions_table(positions);
+    loop {
+        let mut cmd = String::new();
+        stdin.read_line(&mut cmd).expect("read command from stdin");
+
+        let command_result: Result<(), String> = match cmd.trim() {
+            "q" => break,
+            "n" => command_handler.handle_next_page(),
+            "p" => command_handler.handle_previous_page(),
+            "a" => command_handler.handle_add_position(),
+            "c" => command_handler.handle_close_position(),
+            _ => continue,
+        };
+
+        if let Some(err) = command_result.err() {
+            println!("{}", err);
+        }
+
+        command_handler.drawer.draw_table();
+    }
 }
