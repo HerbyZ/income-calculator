@@ -112,6 +112,43 @@ impl CommandHandler {
         Ok(())
     }
 
+    pub fn handle_delete_position(&mut self) -> Result<(), String> {
+        let mut id_input = String::new();
+
+        let stdin = std::io::stdin();
+
+        println!("Enter position id:");
+        stdin.read_line(&mut id_input).expect("read id input");
+
+        let id = id_input.trim().parse::<i32>().expect("parse id to i32");
+
+        let mut confirmation = String::new();
+        println!("Are you sure want to delete position {}? (y,N)", id);
+        stdin
+            .read_line(&mut confirmation)
+            .expect("read confirmation value");
+
+        if confirmation.trim().to_lowercase() != "y" {
+            return Ok(());
+        }
+
+        let pos_index_option = self.positions.iter().position(|pos| pos.id == id);
+        if pos_index_option.is_none() {
+            return Err(format!("Position with id {} not found", id));
+        }
+
+        let pos_index = pos_index_option.unwrap();
+
+        let mut new_positions = self.positions.clone();
+        new_positions.remove(pos_index);
+
+        if let Err(error) = self.update_positions(new_positions) {
+            exit_with_error(error);
+        }
+
+        Ok(())
+    }
+
     fn update_positions(&mut self, positions: Vec<Position>) -> Result<(), String> {
         self.positions = positions.clone();
         self.drawer.positions = positions.clone();

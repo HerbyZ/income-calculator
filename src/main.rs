@@ -37,7 +37,11 @@ fn main() {
             "p" => command_handler.handle_previous_page(),
             "a" => command_handler.handle_add_position(),
             "c" => command_handler.handle_close_position(),
-            _ => continue,
+            "d" => command_handler.handle_delete_position(),
+            _ => {
+                command_handler.drawer.draw_table();
+                continue;
+            }
         };
 
         if let Some(err) = command_result.err() {
