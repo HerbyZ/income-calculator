@@ -102,13 +102,19 @@ impl CommandHandler {
         position.sell_price = sell_price;
         position.income = (sell_price - position.buy_price) * position.amount;
 
-        self.positions[pos_index] = position;
-        self.drawer.positions = self.positions.clone();
+        let mut new_positions = self.positions.clone();
+        new_positions[pos_index] = position;
 
-        if let Err(error) = storage::save_positions(self.positions.clone()) {
+        if let Err(error) = self.update_positions(new_positions) {
             exit_with_error(error);
         }
 
         Ok(())
+    }
+
+    fn update_positions(&mut self, positions: Vec<Position>) -> Result<(), String> {
+        self.positions = positions.clone();
+        self.drawer.positions = positions.clone();
+        storage::save_positions(positions)
     }
 }
