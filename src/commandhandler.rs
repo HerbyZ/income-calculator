@@ -152,6 +152,13 @@ impl CommandHandler {
         Ok(())
     }
 
+    pub fn handle_help(&self) -> Result<(), String> {
+        self.drawer.draw_help_page();
+        let _ = std::io::stdin().read_line(&mut String::new());
+
+        Ok(())
+    }
+
     fn update_positions(&mut self, positions: Vec<Position>) -> Result<(), String> {
         self.positions = positions.clone();
         self.drawer.positions = positions.clone();

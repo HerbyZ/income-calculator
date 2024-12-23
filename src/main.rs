@@ -26,6 +26,7 @@ fn main() {
     let stdin = std::io::stdin();
 
     command_handler.drawer.draw_table();
+    command_handler.drawer.draw_help_tooltip();
 
     loop {
         let mut cmd = String::new();
@@ -38,6 +39,7 @@ fn main() {
             "a" => command_handler.handle_add_position(),
             "c" => command_handler.handle_close_position(),
             "d" => command_handler.handle_delete_position(),
+            "h" => command_handler.handle_help(),
             _ => {
                 command_handler.drawer.draw_table();
                 continue;
@@ -49,5 +51,6 @@ fn main() {
         }
 
         command_handler.drawer.draw_table();
+        command_handler.drawer.draw_help_tooltip();
     }
 }

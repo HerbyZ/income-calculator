@@ -105,6 +105,28 @@ impl Drawer {
         }
     }
 
+    pub fn draw_help_tooltip(&self) {
+        println!("{}", "Type 'h' for help".italic().bright_black());
+    }
+
+    pub fn draw_help_page(&self) {
+        clear_screen();
+        println!("{}\n", "Available commands:".bold());
+        println!("{} - {}", "h".bold().black().on_white(), "Show help page");
+        println!("{} - {}", "q".bold().black().on_white(), "Exit application");
+        println!("{} - {}", "a".bold().black().on_white(), "Add new position");
+        println!("{} - {}", "c".bold().black().on_white(), "Close position");
+        println!("{} - {}", "d".bold().black().on_white(), "Delete position");
+        println!("{} - {}", "n".bold().black().on_white(), "Show next page");
+        println!(
+            "{} - {}",
+            "n".bold().black().on_white(),
+            "Show previous page"
+        );
+
+        println!("\n{}", "Press Enter to continue...".italic().bright_black());
+    }
+
     fn draw_page_counter(&self) {
         let pages_count: f64 = self.get_pages_count();
         print!("Page ");
