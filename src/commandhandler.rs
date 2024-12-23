@@ -1,4 +1,8 @@
-use crate::{exit_with_error, storage, Drawer, Position};
+use crate::{
+    exit_with_error, storage,
+    utils::input::{ask_confirmation, ask_for_input, wait_for_enter, ConfirmationStatus},
+    Drawer, Position,
+};
 
 pub struct CommandHandler {
     pub drawer: Drawer,
@@ -14,30 +18,18 @@ impl CommandHandler {
     }
 
     pub fn handle_add_position(&mut self) -> Result<(), String> {
-        let mut name_input = String::new();
-        let mut amount_input = String::new();
-        let mut value_input = String::new();
-
-        let stdin = std::io::stdin();
-
-        println!("Enter position name:");
-        stdin.read_line(&mut name_input).expect("read name");
-
-        println!("Enter position amount:");
-        stdin.read_line(&mut amount_input).expect("read amount");
-
-        println!("Enter position value:");
-        stdin.read_line(&mut value_input).expect("read value");
-
-        let name = name_input.trim().to_string();
-        let amount = amount_input
-            .trim()
-            .parse::<f64>()
-            .expect("parse amount to f64");
-        let value = value_input
-            .trim()
-            .parse::<f64>()
-            .expect("parse value to f64");
+        let name = match ask_for_input::<String>("Enter position name") {
+            Ok(value) => value,
+            Err(error) => return Err(error),
+        };
+        let amount = match ask_for_input::<f64>("Enter position amount") {
+            Ok(value) => value,
+            Err(error) => return Err(error),
+        };
+        let value = match ask_for_input::<f64>("Enter position value") {
+            Ok(value) => value,
+            Err(error) => return Err(error),
+        };
 
         let id = if let Some(last_position) = self.positions.last() {
             last_position.id + 1
@@ -72,24 +64,15 @@ impl CommandHandler {
     }
 
     pub fn handle_close_position(&mut self) -> Result<(), String> {
-        let mut id_input = String::new();
-        let mut sell_price_input = String::new();
+        let id = match ask_for_input::<i32>("Enter position id") {
+            Ok(value) => value,
+            Err(error) => return Err(error),
+        };
 
-        let stdin = std::io::stdin();
-
-        println!("Enter position id:");
-        stdin.read_line(&mut id_input).expect("read id input");
-
-        println!("Enter sell price:");
-        stdin
-            .read_line(&mut sell_price_input)
-            .expect("read sell price input");
-
-        let id = id_input.trim().parse::<i32>().expect("parse id to i32");
-        let sell_price = sell_price_input
-            .trim()
-            .parse::<f64>()
-            .expect("parse sell price to f64");
+        let sell_price = match ask_for_input::<f64>("Enter sell price") {
+            Ok(value) => value,
+            Err(error) => return Err(error),
+        };
 
         let pos_index_option = self.positions.iter().position(|pos| pos.id == id);
         if pos_index_option.is_none() {
@@ -113,25 +96,24 @@ impl CommandHandler {
     }
 
     pub fn handle_delete_position(&mut self) -> Result<(), String> {
-        let mut id_input = String::new();
+        let id = match ask_for_input::<i32>("Enter position id") {
+            Ok(value) => value,
+            Err(error) => return Err(error),
+        };
 
-        let stdin = std::io::stdin();
-
-        println!("Enter position id:");
-        stdin.read_line(&mut id_input).expect("read id input");
-
-        let id = id_input.trim().parse::<i32>().expect("parse id to i32");
-
-        let mut confirmation = String::new();
         if let Err(error) = self.drawer.draw_single_position(id) {
             return Err(error);
         }
-        println!("Are you sure want to delete position {}? (y,N)", id);
-        stdin
-            .read_line(&mut confirmation)
-            .expect("read confirmation value");
 
-        if confirmation.trim().to_lowercase() != "y" {
+        let confirmation = match ask_confirmation(
+            format!("Are you sure want to delete position {}? (y,N)", id).as_str(),
+            ConfirmationStatus::Rejected,
+        ) {
+            Ok(value) => value,
+            Err(error) => return Err(error),
+        };
+
+        if confirmation == ConfirmationStatus::Rejected {
             return Ok(());
         }
 
@@ -154,9 +136,7 @@ impl CommandHandler {
 
     pub fn handle_help(&self) -> Result<(), String> {
         self.drawer.draw_help_page();
-        let _ = std::io::stdin().read_line(&mut String::new());
-
-        Ok(())
+        wait_for_enter()
     }
 
     fn update_positions(&mut self, positions: Vec<Position>) -> Result<(), String> {
