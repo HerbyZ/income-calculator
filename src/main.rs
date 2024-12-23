@@ -6,6 +6,7 @@ pub mod utils;
 use commandhandler::CommandHandler;
 use drawer::Drawer;
 use storage::Position;
+use utils::input::wait_for_enter;
 
 fn exit_with_error(error: String) {
     println!("ERROR: {}", error);
@@ -46,8 +47,12 @@ fn main() {
             }
         };
 
-        if let Some(err) = command_result.err() {
-            println!("{}", err);
+        if let Some(error) = command_result.err() {
+            println!("ERROR: {}", error);
+
+            if let Err(console_error) = wait_for_enter() {
+                exit_with_error(console_error);
+            }
         }
 
         command_handler.drawer.draw_table();
