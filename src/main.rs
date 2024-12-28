@@ -1,10 +1,9 @@
 pub mod commands;
-pub mod drawer;
+pub mod drawers;
 pub mod storage;
 pub mod utils;
 
 use commands::CommandHandler;
-use drawer::Drawer;
 use storage::Position;
 use utils::input::wait_for_enter;
 

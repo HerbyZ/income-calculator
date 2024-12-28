@@ -6,14 +6,14 @@ use crate::utils::math::round;
 
 const ITEMS_PER_PAGE: i32 = 10;
 
-pub struct Drawer {
+pub struct GlobalDrawer {
     page: i32,
     pub positions: Vec<Position>,
 }
 
-impl Drawer {
-    pub fn new(positions: Vec<Position>) -> Drawer {
-        Drawer { positions, page: 1 }
+impl GlobalDrawer {
+    pub fn new(positions: Vec<Position>) -> GlobalDrawer {
+        GlobalDrawer { positions, page: 1 }
     }
 
     pub fn draw_table(&self) {

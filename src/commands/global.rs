@@ -1,12 +1,10 @@
 use super::CommandResult;
-use crate::{
-    exit_with_error, storage,
-    utils::input::{ask_confirmation, ask_for_input, wait_for_enter, ConfirmationStatus},
-    Drawer, Position,
-};
+use crate::drawers::global::GlobalDrawer;
+use crate::utils::input::{ask_confirmation, ask_for_input, wait_for_enter, ConfirmationStatus};
+use crate::{exit_with_error, storage, Position};
 
 pub struct GlobalHandler {
-    pub drawer: Drawer,
+    pub drawer: GlobalDrawer,
     positions: Vec<Position>,
 }
 
@@ -14,7 +12,7 @@ impl GlobalHandler {
     pub fn new(initial_positions: Vec<Position>) -> GlobalHandler {
         GlobalHandler {
             positions: initial_positions.clone(),
-            drawer: Drawer::new(initial_positions.clone()),
+            drawer: GlobalDrawer::new(initial_positions.clone()),
         }
     }
 
