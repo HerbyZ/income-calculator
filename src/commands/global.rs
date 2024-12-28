@@ -24,6 +24,7 @@ impl GlobalHandler {
             "a" => self.handle_add_position(),
             "c" => self.handle_close_position(),
             "d" => self.handle_delete_position(),
+            "e" => self.handle_edit_position(),
             "h" => self.handle_help(),
             _ => {
                 self.drawer.draw_table();
@@ -153,6 +154,20 @@ impl GlobalHandler {
         }
 
         CommandResult::Ok
+    }
+
+    pub fn handle_edit_position(&self) -> CommandResult {
+        let id = match ask_for_input::<i32>("Enter position id") {
+            Ok(value) => value,
+            Err(error) => return CommandResult::Error(error),
+        };
+
+        let position = match self.positions.iter().find(|pos| pos.id == id) {
+            Some(pos) => pos.to_owned(),
+            None => return CommandResult::Error(format!("Position with id '{}' not found", id)),
+        };
+
+        CommandResult::ChangeEditMode(super::EditMode::Position(position))
     }
 
     pub fn handle_help(&self) -> CommandResult {
