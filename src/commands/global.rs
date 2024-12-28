@@ -1,34 +1,51 @@
+use super::CommandResult;
 use crate::{
     exit_with_error, storage,
     utils::input::{ask_confirmation, ask_for_input, wait_for_enter, ConfirmationStatus},
     Drawer, Position,
 };
 
-pub struct CommandHandler {
+pub struct GlobalHandler {
     pub drawer: Drawer,
     positions: Vec<Position>,
 }
 
-impl CommandHandler {
-    pub fn new(initial_positions: Vec<Position>) -> CommandHandler {
-        CommandHandler {
+impl GlobalHandler {
+    pub fn new(initial_positions: Vec<Position>) -> GlobalHandler {
+        GlobalHandler {
             positions: initial_positions.clone(),
             drawer: Drawer::new(initial_positions.clone()),
         }
     }
 
-    pub fn handle_add_position(&mut self) -> Result<(), String> {
+    pub fn handle_command(&mut self, command: String) -> CommandResult {
+        match command.trim() {
+            "q" => std::process::exit(0),
+            "n" => self.handle_next_page(),
+            "p" => self.handle_previous_page(),
+            "a" => self.handle_add_position(),
+            "c" => self.handle_close_position(),
+            "d" => self.handle_delete_position(),
+            "h" => self.handle_help(),
+            _ => {
+                self.drawer.draw_table();
+                CommandResult::CommandNotFound
+            }
+        }
+    }
+
+    pub fn handle_add_position(&mut self) -> CommandResult {
         let name = match ask_for_input::<String>("Enter position name") {
             Ok(value) => value,
-            Err(error) => return Err(error),
+            Err(error) => return CommandResult::Error(error),
         };
         let amount = match ask_for_input::<f64>("Enter position amount") {
             Ok(value) => value,
-            Err(error) => return Err(error),
+            Err(error) => return CommandResult::Error(error),
         };
         let value = match ask_for_input::<f64>("Enter position value") {
             Ok(value) => value,
-            Err(error) => return Err(error),
+            Err(error) => return CommandResult::Error(error),
         };
 
         let id = if let Some(last_position) = self.positions.last() {
@@ -52,31 +69,37 @@ impl CommandHandler {
             exit_with_error(error);
         }
 
-        Ok(())
+        CommandResult::Ok
     }
 
-    pub fn handle_next_page(&mut self) -> Result<(), String> {
-        self.drawer.next_page()
+    pub fn handle_next_page(&mut self) -> CommandResult {
+        match self.drawer.next_page() {
+            Ok(()) => CommandResult::Ok,
+            Err(error) => CommandResult::Error(error),
+        }
     }
 
-    pub fn handle_previous_page(&mut self) -> Result<(), String> {
-        self.drawer.previous_page()
+    pub fn handle_previous_page(&mut self) -> CommandResult {
+        match self.drawer.previous_page() {
+            Ok(()) => CommandResult::Ok,
+            Err(error) => CommandResult::Error(error),
+        }
     }
 
-    pub fn handle_close_position(&mut self) -> Result<(), String> {
+    pub fn handle_close_position(&mut self) -> CommandResult {
         let id = match ask_for_input::<i32>("Enter position id") {
             Ok(value) => value,
-            Err(error) => return Err(error),
+            Err(error) => return CommandResult::Error(error),
         };
 
         let sell_price = match ask_for_input::<f64>("Enter sell price") {
             Ok(value) => value,
-            Err(error) => return Err(error),
+            Err(error) => return CommandResult::Error(error),
         };
 
         let pos_index_option = self.positions.iter().position(|pos| pos.id == id);
         if pos_index_option.is_none() {
-            return Err(format!("Position with id {} not found", id));
+            return CommandResult::Error(format!("Position with id {} not found", id));
         }
 
         let pos_index = pos_index_option.unwrap();
@@ -92,17 +115,17 @@ impl CommandHandler {
             exit_with_error(error);
         }
 
-        Ok(())
+        CommandResult::Ok
     }
 
-    pub fn handle_delete_position(&mut self) -> Result<(), String> {
+    pub fn handle_delete_position(&mut self) -> CommandResult {
         let id = match ask_for_input::<i32>("Enter position id") {
             Ok(value) => value,
-            Err(error) => return Err(error),
+            Err(error) => return CommandResult::Error(error),
         };
 
         if let Err(error) = self.drawer.draw_single_position(id) {
-            return Err(error);
+            return CommandResult::Error(error);
         }
 
         let confirmation = match ask_confirmation(
@@ -110,16 +133,16 @@ impl CommandHandler {
             ConfirmationStatus::Rejected,
         ) {
             Ok(value) => value,
-            Err(error) => return Err(error),
+            Err(error) => return CommandResult::Error(error),
         };
 
         if confirmation == ConfirmationStatus::Rejected {
-            return Ok(());
+            return CommandResult::Ok;
         }
 
         let pos_index_option = self.positions.iter().position(|pos| pos.id == id);
         if pos_index_option.is_none() {
-            return Err(format!("Position with id {} not found", id));
+            return CommandResult::Error(format!("Position with id {} not found", id));
         }
 
         let pos_index = pos_index_option.unwrap();
@@ -131,12 +154,16 @@ impl CommandHandler {
             exit_with_error(error);
         }
 
-        Ok(())
+        CommandResult::Ok
     }
 
-    pub fn handle_help(&self) -> Result<(), String> {
+    pub fn handle_help(&self) -> CommandResult {
         self.drawer.draw_help_page();
-        wait_for_enter()
+        if let Err(error) = wait_for_enter() {
+            return CommandResult::Error(error);
+        }
+
+        CommandResult::Ok
     }
 
     fn update_positions(&mut self, positions: Vec<Position>) -> Result<(), String> {
