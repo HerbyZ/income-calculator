@@ -3,6 +3,7 @@ use prettytable::{row, Table};
 
 use crate::models::Position;
 use crate::utils::math::round;
+use crate::utils::pagination::select_items_for_page;
 
 const ITEMS_PER_PAGE: i32 = 10;
 
@@ -129,26 +130,4 @@ impl GlobalDrawer {
 fn clear_screen() {
     let term = console::Term::stdout();
     term.clear_screen().expect("clear terminal screen");
-}
-
-fn select_items_for_page(
-    mut items: Vec<Position>,
-    page: i32,
-    items_per_page: i32,
-) -> Vec<Position> {
-    let split_index: usize = (items_per_page * (page - 1)).try_into().unwrap();
-    let splitted_items = items.split_off(split_index);
-
-    let mut result: Vec<Position> = vec![];
-    for i in 0..items_per_page - 1 {
-        let index: usize = i.try_into().unwrap();
-
-        if let Some(item) = splitted_items.get(index) {
-            result.push(item.clone());
-        } else {
-            break;
-        }
-    }
-
-    result
 }
