@@ -1,4 +1,4 @@
-use crate::storage::Position;
+use crate::models::Position;
 
 use super::CommandResult;
 

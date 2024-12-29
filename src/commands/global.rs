@@ -1,7 +1,8 @@
 use super::CommandResult;
 use crate::drawers::global::GlobalDrawer;
+use crate::models::{OrderType, Position, PositionOrder};
 use crate::utils::input::{ask_confirmation, ask_for_input, wait_for_enter, ConfirmationStatus};
-use crate::{exit_with_error, storage, Position};
+use crate::{exit_with_error, storage};
 
 pub struct GlobalHandler {
     pub drawer: GlobalDrawer,
@@ -22,7 +23,6 @@ impl GlobalHandler {
             "n" => self.handle_next_page(),
             "p" => self.handle_previous_page(),
             "a" => self.handle_add_position(),
-            "c" => self.handle_close_position(),
             "d" => self.handle_delete_position(),
             "e" => self.handle_edit_position(),
             "h" => self.handle_help(),
@@ -38,6 +38,23 @@ impl GlobalHandler {
             Ok(value) => value,
             Err(error) => return CommandResult::Error(error),
         };
+
+        let order_type = match ask_for_input::<String>("Enter order type (long/short)") {
+            Ok(value) => value,
+            Err(error) => return CommandResult::Error(error),
+        };
+
+        let order_type = match order_type.to_lowercase().as_str() {
+            "l" | "long" => OrderType::Long,
+            "s" | "short" => OrderType::Short,
+            _ => {
+                return CommandResult::Error(format!(
+                    "'{}' is not valid position type (long/short)",
+                    order_type
+                ))
+            }
+        };
+
         let amount = match ask_for_input::<f64>("Enter position amount") {
             Ok(value) => value,
             Err(error) => return CommandResult::Error(error),
@@ -53,15 +70,17 @@ impl GlobalHandler {
             0
         };
 
-        self.positions.push(Position {
-            id,
-            name,
+        let first_order = PositionOrder {
+            id: 0,
+            order_type,
             amount,
             value,
-            buy_price: value / amount,
-            sell_price: 0f64,
-            income: 0f64,
-        });
+            price: value / amount,
+        };
+
+        self.positions
+            .push(Position::new(id, name, vec![first_order]));
+
         self.drawer.positions = self.positions.clone();
 
         if let Err(error) = storage::save_positions(self.positions.clone()) {
@@ -83,38 +102,6 @@ impl GlobalHandler {
             Ok(()) => CommandResult::Ok,
             Err(error) => CommandResult::Error(error),
         }
-    }
-
-    pub fn handle_close_position(&mut self) -> CommandResult {
-        let id = match ask_for_input::<i32>("Enter position id") {
-            Ok(value) => value,
-            Err(error) => return CommandResult::Error(error),
-        };
-
-        let sell_price = match ask_for_input::<f64>("Enter sell price") {
-            Ok(value) => value,
-            Err(error) => return CommandResult::Error(error),
-        };
-
-        let pos_index_option = self.positions.iter().position(|pos| pos.id == id);
-        if pos_index_option.is_none() {
-            return CommandResult::Error(format!("Position with id {} not found", id));
-        }
-
-        let pos_index = pos_index_option.unwrap();
-
-        let mut position = self.positions[pos_index].clone();
-        position.sell_price = sell_price;
-        position.income = (sell_price - position.buy_price) * position.amount;
-
-        let mut new_positions = self.positions.clone();
-        new_positions[pos_index] = position;
-
-        if let Err(error) = self.update_positions(new_positions) {
-            exit_with_error(error);
-        }
-
-        CommandResult::Ok
     }
 
     pub fn handle_delete_position(&mut self) -> CommandResult {
