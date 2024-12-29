@@ -97,7 +97,7 @@ impl GlobalDrawer {
         println!("{} - {}", "h".bold().black().on_white(), "Show help page");
         println!("{} - {}", "q".bold().black().on_white(), "Exit application");
         println!("{} - {}", "a".bold().black().on_white(), "Add new position");
-        println!("{} - {}", "c".bold().black().on_white(), "Close position");
+        println!("{} - {}", "e".bold().black().on_white(), "Edit position");
         println!("{} - {}", "d".bold().black().on_white(), "Delete position");
         println!("{} - {}", "n".bold().black().on_white(), "Show next page");
         println!(
