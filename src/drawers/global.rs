@@ -1,7 +1,7 @@
 use colored::Colorize;
 use prettytable::{row, Table};
 
-use crate::storage::Position;
+use crate::models::Position;
 use crate::utils::math::round;
 
 const ITEMS_PER_PAGE: i32 = 10;
@@ -20,15 +20,7 @@ impl GlobalDrawer {
         clear_screen();
 
         let mut table = Table::new();
-        table.add_row(row![
-            "Id",
-            "Name",
-            "Amount",
-            "Value",
-            "Buy price",
-            "Sell price",
-            "Income"
-        ]);
+        table.add_row(row!["Id", "Name", "Amount", "Value", "Avg price", "Income"]);
 
         let mut reversed_positions = self.positions.clone();
         reversed_positions.reverse();
@@ -42,8 +34,7 @@ impl GlobalDrawer {
                 position.name,
                 round(position.amount).unwrap(),
                 round(position.value).unwrap(),
-                round(position.buy_price).unwrap(),
-                round(position.sell_price).unwrap(),
+                round(position.avg_price).unwrap(),
                 round(position.income).unwrap(),
             ]);
         });
@@ -61,23 +52,14 @@ impl GlobalDrawer {
         let position = position_option.unwrap();
 
         let mut table = Table::new();
-        table.add_row(row![
-            "Id",
-            "Name",
-            "Amount",
-            "Value",
-            "Buy price",
-            "Sell price",
-            "Income"
-        ]);
+        table.add_row(row!["Id", "Name", "Amount", "Value", "Avg price", "Income"]);
 
         table.add_row(row![
             position.id,
             position.name,
             round(position.amount).unwrap(),
             round(position.value).unwrap(),
-            round(position.buy_price).unwrap(),
-            round(position.sell_price).unwrap(),
+            round(position.avg_price).unwrap(),
             round(position.income).unwrap(),
         ]);
 
