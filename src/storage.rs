@@ -1,18 +1,8 @@
-use serde::{Deserialize, Serialize};
 use std::path::Path;
 
-const STORAGE_FILE_PATH: &str = "./storage.json";
+use crate::models::Position;
 
-#[derive(Clone, Serialize, Deserialize)]
-pub struct Position {
-    pub id: i32,
-    pub name: String,
-    pub amount: f64,
-    pub value: f64,
-    pub buy_price: f64,
-    pub sell_price: f64,
-    pub income: f64,
-}
+const STORAGE_FILE_PATH: &str = "./storage.json";
 
 pub fn initialize_storage() -> Result<(), String> {
     if Path::new(STORAGE_FILE_PATH).exists() {

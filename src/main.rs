@@ -1,10 +1,11 @@
 pub mod commands;
 pub mod drawers;
+pub mod models;
 pub mod storage;
 pub mod utils;
 
 use commands::CommandHandler;
-use storage::Position;
+use models::Position;
 use utils::input::wait_for_enter;
 
 fn exit_with_error(error: String) {
