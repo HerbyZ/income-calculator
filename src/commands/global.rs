@@ -76,6 +76,7 @@ impl GlobalHandler {
             amount,
             value,
             price: value / amount,
+            income: 0f64,
         };
 
         self.positions

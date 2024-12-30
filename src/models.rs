@@ -9,6 +9,7 @@ pub struct Position {
     pub value: f64,
     pub avg_price: f64,
     pub income: f64,
+    pub orders: Vec<PositionOrder>,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -18,6 +19,7 @@ pub struct PositionOrder {
     pub amount: f64,
     pub value: f64,
     pub price: f64,
+    pub income: f64,
 }
 
 #[derive(PartialEq, Eq, Clone, Debug, Serialize, Deserialize)]
@@ -61,6 +63,7 @@ impl Position {
             avg_price,
             income,
             value,
+            orders,
         }
     }
 }
