@@ -2,6 +2,7 @@ use colored::Colorize;
 use prettytable::{row, Table};
 
 use crate::models::Position;
+use crate::utils::console::clear_screen;
 use crate::utils::math::round;
 use crate::utils::pagination::select_items_for_page;
 
@@ -18,7 +19,7 @@ impl GlobalDrawer {
     }
 
     pub fn draw_table(&self) {
-        clear_screen();
+        clear_screen().expect("clear screen");
 
         let mut table = Table::new();
         table.add_row(row!["Id", "Name", "Amount", "Value", "Avg price", "Income"]);
@@ -93,7 +94,7 @@ impl GlobalDrawer {
     }
 
     pub fn draw_help_page(&self) {
-        clear_screen();
+        clear_screen().expect("clear screen");
         println!("{}\n", "Available commands:".bold());
         println!("{} - {}", "h".bold().black().on_white(), "Show help page");
         println!("{} - {}", "q".bold().black().on_white(), "Exit application");
@@ -125,9 +126,4 @@ impl GlobalDrawer {
     fn get_pages_count(&self) -> f64 {
         (self.positions.len() as f64 / ITEMS_PER_PAGE as f64).ceil()
     }
-}
-
-fn clear_screen() {
-    let term = console::Term::stdout();
-    term.clear_screen().expect("clear terminal screen");
 }

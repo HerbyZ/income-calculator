@@ -54,3 +54,8 @@ pub fn wait_for_enter() -> Result<(), String> {
 
     Ok(())
 }
+
+pub fn clear_screen() -> std::io::Result<()> {
+    let term = console::Term::stdout();
+    term.clear_screen()
+}
