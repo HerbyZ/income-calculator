@@ -6,7 +6,7 @@ pub mod utils;
 
 use commands::CommandHandler;
 use models::Position;
-use utils::input::wait_for_enter;
+use utils::console::wait_for_enter;
 
 fn exit_with_error(error: String) {
     println!("ERROR: {}", error);
