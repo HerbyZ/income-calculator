@@ -39,20 +39,14 @@ impl GlobalHandler {
             Err(error) => return CommandResult::Error(error),
         };
 
-        let order_type = match ask_for_input::<String>("Enter order type (long/short)") {
+        let order_type_input = match ask_for_input::<String>("Enter order type (long/short)") {
             Ok(value) => value,
             Err(error) => return CommandResult::Error(error),
         };
 
-        let order_type = match order_type.to_lowercase().as_str() {
-            "l" | "long" => Action::Long,
-            "s" | "short" => Action::Short,
-            _ => {
-                return CommandResult::Error(format!(
-                    "'{}' is not valid position type (long/short)",
-                    order_type
-                ))
-            }
+        let order_type = match Action::from_string(order_type_input) {
+            Ok(action) => action,
+            Err(error) => return CommandResult::Error(error),
         };
 
         let amount = match ask_for_input::<f64>("Enter position amount") {
