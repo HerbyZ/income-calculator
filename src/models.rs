@@ -3,19 +3,19 @@ use serde::{Deserialize, Serialize};
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Position {
     pub id: i32,
-    pub position_type: OrderType,
+    pub position_type: Action,
     pub name: String,
     pub amount: f64,
     pub value: f64,
     pub avg_price: f64,
     pub income: f64,
-    pub orders: Vec<PositionOrder>,
+    pub orders: Vec<Order>,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
-pub struct PositionOrder {
+pub struct Order {
     pub id: i32,
-    pub order_type: OrderType,
+    pub order_type: Action,
     pub amount: f64,
     pub value: f64,
     pub price: f64,
@@ -23,13 +23,13 @@ pub struct PositionOrder {
 }
 
 #[derive(PartialEq, Eq, Clone, Debug, Serialize, Deserialize)]
-pub enum OrderType {
+pub enum Action {
     Long,
     Short,
 }
 
 impl Position {
-    pub fn new(id: i32, name: String, mut orders: Vec<PositionOrder>) -> Position {
+    pub fn new(id: i32, name: String, mut orders: Vec<Order>) -> Position {
         orders.sort_by(|first, second| first.id.cmp(&second.id));
         let pos_type = orders.first().unwrap().clone().order_type;
 

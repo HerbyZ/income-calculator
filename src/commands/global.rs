@@ -1,6 +1,6 @@
 use super::CommandResult;
 use crate::drawers::global::GlobalDrawer;
-use crate::models::{OrderType, Position, PositionOrder};
+use crate::models::{Action, Order, Position};
 use crate::utils::console::{ask_confirmation, ask_for_input, wait_for_enter, ConfirmationStatus};
 use crate::{exit_with_error, storage};
 
@@ -45,8 +45,8 @@ impl GlobalHandler {
         };
 
         let order_type = match order_type.to_lowercase().as_str() {
-            "l" | "long" => OrderType::Long,
-            "s" | "short" => OrderType::Short,
+            "l" | "long" => Action::Long,
+            "s" | "short" => Action::Short,
             _ => {
                 return CommandResult::Error(format!(
                     "'{}' is not valid position type (long/short)",
@@ -70,7 +70,7 @@ impl GlobalHandler {
             0
         };
 
-        let first_order = PositionOrder {
+        let first_order = Order {
             id: 0,
             order_type,
             amount,

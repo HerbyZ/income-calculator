@@ -2,7 +2,7 @@ use colored::Colorize;
 use prettytable::{row, Table};
 
 use crate::{
-    models::{OrderType, Position},
+    models::{Action, Position},
     utils::console::clear_screen,
 };
 
@@ -30,8 +30,8 @@ impl PositionDrawer {
 
         self.position.orders.iter().for_each(|order| {
             let order_type = match order.order_type {
-                OrderType::Long => "Buy",
-                OrderType::Short => "Sell",
+                Action::Long => "Buy",
+                Action::Short => "Sell",
             };
 
             let income_value = if self.position.position_type == order.order_type {
@@ -54,8 +54,8 @@ impl PositionDrawer {
 
         print!("Position {} ", self.position.id);
         match self.position.position_type {
-            OrderType::Long => print!("{} ", "Long".bold().green()),
-            OrderType::Short => todo!("{} ", "Short".bold().red()),
+            Action::Long => print!("{} ", "Long".bold().green()),
+            Action::Short => todo!("{} ", "Short".bold().red()),
         }
         println!("{}", self.position.name.bold());
         table.printstd();
