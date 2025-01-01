@@ -29,12 +29,12 @@ impl PositionDrawer {
         table.add_row(row!["Id", "Type", "Amount", "Value", "Price", "Income"]);
 
         self.position.orders.iter().for_each(|order| {
-            let order_type = match order.order_type {
+            let order_type = match order.action {
                 Action::Long => "Buy",
                 Action::Short => "Sell",
             };
 
-            let income_value = if self.position.position_type == order.order_type {
+            let income_value = if self.position.action == order.action {
                 String::from("-")
             } else {
                 order.income.to_string()
@@ -53,7 +53,7 @@ impl PositionDrawer {
         clear_screen().expect("clear screen");
 
         print!("Position {} ", self.position.id);
-        match self.position.position_type {
+        match self.position.action {
             Action::Long => print!("{} ", "Long".bold().green()),
             Action::Short => todo!("{} ", "Short".bold().red()),
         }

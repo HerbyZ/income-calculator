@@ -3,7 +3,7 @@ use serde::{Deserialize, Serialize};
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Position {
     pub id: i32,
-    pub position_type: Action,
+    pub action: Action,
     pub name: String,
     pub amount: f64,
     pub value: f64,
@@ -15,7 +15,7 @@ pub struct Position {
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Order {
     pub id: i32,
-    pub order_type: Action,
+    pub action: Action,
     pub amount: f64,
     pub value: f64,
     pub price: f64,
@@ -31,13 +31,13 @@ pub enum Action {
 impl Position {
     pub fn new(id: i32, name: String, mut orders: Vec<Order>) -> Position {
         orders.sort_by(|first, second| first.id.cmp(&second.id));
-        let pos_type = orders.first().unwrap().clone().order_type;
+        let pos_type = orders.first().unwrap().clone().action;
 
         let mut amount = 0f64;
         let mut value = 0f64;
 
         orders.iter().for_each(|order| {
-            if pos_type == order.order_type {
+            if pos_type == order.action {
                 amount += order.amount;
                 value += order.value;
             } else {
@@ -50,7 +50,7 @@ impl Position {
         let mut income = 0f64;
 
         orders.iter().for_each(|order| {
-            if pos_type != order.order_type {
+            if pos_type != order.action {
                 income += avg_price - order.price;
             }
         });
@@ -58,7 +58,7 @@ impl Position {
         Position {
             id,
             name,
-            position_type: pos_type,
+            action: pos_type,
             amount,
             avg_price,
             income,

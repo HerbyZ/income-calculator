@@ -72,7 +72,7 @@ impl GlobalHandler {
 
         let first_order = Order {
             id: 0,
-            order_type,
+            action: order_type,
             amount,
             value,
             price: value / amount,
