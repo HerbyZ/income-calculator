@@ -18,7 +18,7 @@ impl GlobalDrawer {
         GlobalDrawer { positions, page: 1 }
     }
 
-    pub fn draw_table(&self) {
+    pub fn render_positions_table(&self) {
         clear_screen().expect("clear screen");
 
         let mut table = Table::new();

@@ -27,7 +27,7 @@ impl GlobalHandler {
             "e" => self.handle_edit_position(),
             "h" => self.handle_help(),
             _ => {
-                self.drawer.draw_table();
+                self.drawer.render_positions_table();
                 CommandResult::CommandNotFound
             }
         }
