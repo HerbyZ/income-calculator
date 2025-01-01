@@ -62,7 +62,7 @@ impl CommandHandler {
                 }
 
                 self.position_handler
-                    .clone()
+                    .as_mut()
                     .unwrap()
                     .handle_command(command)
             }
