@@ -1,5 +1,7 @@
 use serde::{Deserialize, Serialize};
 
+use super::{Action, Order};
+
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Position {
     pub id: i32,
@@ -20,17 +22,23 @@ impl Position {
         let mut amount = 0f64;
         let mut value = 0f64;
 
+        let mut same_action_prices_sum = 0f64;
+        let mut same_action_orders_count = 0f64;
+
         orders.iter().for_each(|order| {
             if pos_type == order.action {
                 amount += order.amount;
                 value += order.value;
+
+                same_action_prices_sum += order.price;
+                same_action_orders_count += 1f64;
             } else {
                 amount -= order.amount;
                 value -= order.value;
             }
         });
 
-        let avg_price = value / amount;
+        let avg_price = same_action_prices_sum / same_action_orders_count;
         let mut income = 0f64;
 
         orders.iter().for_each(|order| {
@@ -48,37 +56,6 @@ impl Position {
             income,
             value,
             orders,
-        }
-    }
-}
-
-#[derive(Clone, Debug, Serialize, Deserialize)]
-pub struct Order {
-    pub id: i32,
-    pub action: Action,
-    pub amount: f64,
-    pub value: f64,
-    pub price: f64,
-    pub income: f64,
-}
-
-#[derive(PartialEq, Eq, Clone, Debug, Serialize, Deserialize)]
-pub enum Action {
-    Long,
-    Short,
-}
-
-impl Action {
-    pub fn from_string(string: String) -> Result<Action, String> {
-        match string.to_lowercase().as_str() {
-            "l" | "long" => Ok(Action::Long),
-            "s" | "short" => Ok(Action::Short),
-            _ => {
-                return Err(format!(
-                    "'{}' is not valid position type (long/short)",
-                    string
-                ))
-            }
         }
     }
 }
