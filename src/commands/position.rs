@@ -51,30 +51,9 @@ impl PositionHandler {
             Err(error) => return CommandResult::Error(error),
         };
 
-        let price = value / amount;
+        let order = Order::new(self.position.clone(), action, amount, value);
+        self.position.add_order(order);
 
-        let income = if self.position.action != action {
-            (price - self.position.avg_price) * amount
-        } else {
-            0f64
-        };
-
-        let id = self
-            .position
-            .orders
-            .last()
-            .expect("get last order of position")
-            .id
-            + 1;
-
-        self.position.orders.push(Order {
-            id,
-            action,
-            amount,
-            value,
-            price,
-            income,
-        });
         self.drawer.set_position(self.position.clone());
         if let Err(error) = storage::save_position(self.position.clone()) {
             exit_with_error(error);
