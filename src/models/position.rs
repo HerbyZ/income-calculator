@@ -45,18 +45,15 @@ impl Position {
         new_orders.push(order.clone());
 
         let mut new_amount = 0f64;
-        let mut new_value = 0f64;
 
         new_orders.iter().for_each(|order| {
             if self.action == order.action {
                 new_amount += order.amount;
-                new_value += order.value;
 
                 same_action_prices_sum += order.price;
                 same_action_orders_count += 1f64;
             } else {
                 new_amount -= order.amount;
-                new_value -= order.value;
             }
         });
 
@@ -71,7 +68,7 @@ impl Position {
         });
 
         self.amount = new_amount;
-        self.value = new_value;
+        self.value = new_amount * self.avg_price;
         self.income = new_income;
         self.orders = new_orders;
     }
