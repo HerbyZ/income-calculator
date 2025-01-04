@@ -4,7 +4,7 @@ use prettytable::{row, Table};
 use crate::models::Position;
 use crate::utils::console::clear_screen;
 use crate::utils::math::round;
-use crate::utils::pagination::select_items_for_page;
+use crate::utils::pagination::{draw_page_counter, get_pages_count, select_items_for_page};
 
 const ITEMS_PER_PAGE: i32 = 10;
 
@@ -42,7 +42,10 @@ impl GlobalDrawer {
         });
 
         table.printstd();
-        self.draw_page_counter();
+        draw_page_counter(
+            self.page,
+            get_pages_count(self.positions.len(), ITEMS_PER_PAGE),
+        );
     }
 
     pub fn draw_single_position(&self, id: i32) -> Result<(), String> {
@@ -80,7 +83,7 @@ impl GlobalDrawer {
     }
 
     pub fn next_page(&mut self) -> Result<(), String> {
-        let max_page = self.get_pages_count();
+        let max_page = get_pages_count(self.positions.len(), ITEMS_PER_PAGE);
         if (self.page + 1) as f64 > max_page {
             Err(String::from("Already at last page"))
         } else {
@@ -109,21 +112,5 @@ impl GlobalDrawer {
         );
 
         println!("\n{}", "Press Enter to continue...".italic().bright_black());
-    }
-
-    fn draw_page_counter(&self) {
-        let pages_count: f64 = self.get_pages_count();
-        print!("Page ");
-
-        println!(
-            "{}{}{}",
-            self.page.to_string().bold().black().on_white(),
-            "/".black().on_white(),
-            pages_count.to_string().bold().black().on_white()
-        );
-    }
-
-    fn get_pages_count(&self) -> f64 {
-        (self.positions.len() as f64 / ITEMS_PER_PAGE as f64).ceil()
     }
 }

@@ -4,6 +4,7 @@ use prettytable::{row, Table};
 use crate::models::{Action, Position};
 use crate::utils::console::clear_screen;
 use crate::utils::math::round;
+use crate::utils::pagination::{draw_page_counter, get_pages_count};
 
 const ITEMS_PER_PAGE: i32 = 10;
 
@@ -23,9 +24,21 @@ impl PositionDrawer {
     }
 
     pub fn render_position_info(self) {
-        let mut table = Table::new();
+        let mut position_table = Table::new();
+        position_table.add_row(row!["Id", "Name", "Amount", "Value", "Avg price", "Income"]);
 
-        table.add_row(row!["Id", "Type", "Amount", "Value", "Price", "Income"]);
+        position_table.add_row(row![
+            self.position.id,
+            self.position.name,
+            round(self.position.amount).unwrap(),
+            round(self.position.value).unwrap(),
+            round(self.position.avg_price).unwrap(),
+            round(self.position.income).unwrap(),
+        ]);
+
+        let mut orders_table = Table::new();
+
+        orders_table.add_row(row!["Id", "Type", "Amount", "Value", "Price", "Income"]);
 
         self.position.orders.iter().for_each(|order| {
             let order_type = match order.action {
@@ -39,7 +52,7 @@ impl PositionDrawer {
                 round(order.income).unwrap().to_string()
             };
 
-            table.add_row(row![
+            orders_table.add_row(row![
                 order.id,
                 order_type,
                 round(order.amount).unwrap(),
@@ -57,7 +70,14 @@ impl PositionDrawer {
             Action::Short => todo!("{} ", "Short".bold().red()),
         }
         println!("{}", self.position.name.bold());
-        table.printstd();
+        position_table.printstd();
+
+        println!("Position {} orders:", self.position.id.to_string().bold());
+        orders_table.printstd();
+        draw_page_counter(
+            self.page,
+            get_pages_count(self.position.orders.len(), ITEMS_PER_PAGE),
+        );
     }
 
     pub fn previous_page(&mut self) -> Result<(), String> {
@@ -70,7 +90,7 @@ impl PositionDrawer {
     }
 
     pub fn next_page(&mut self) -> Result<(), String> {
-        let max_page = self.get_orders_count();
+        let max_page = get_pages_count(self.position.orders.len(), ITEMS_PER_PAGE);
         if (self.page + 1) as f64 > max_page {
             Err(String::from("Already at last page"))
         } else {
@@ -81,9 +101,5 @@ impl PositionDrawer {
 
     pub fn draw_help_tooltip(&self) {
         println!("{}", "Type 'h' for help".italic().bright_black());
-    }
-
-    fn get_orders_count(&self) -> f64 {
-        (self.position.orders.len() as f64 / ITEMS_PER_PAGE as f64).ceil()
     }
 }

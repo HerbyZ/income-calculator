@@ -1,3 +1,5 @@
+use colored::Colorize;
+
 pub fn select_items_for_page<T>(mut items: Vec<T>, page: i32, items_per_page: i32) -> Vec<T>
 where
     T: Clone,
@@ -17,4 +19,18 @@ where
     }
 
     result
+}
+
+pub fn draw_page_counter(current_page: i32, pages_count: f64) {
+    print!("Page ");
+
+    println!(
+        "{}{}{}",
+        current_page.to_string().bold().black().on_white(),
+        "/".black().on_white(),
+        pages_count.to_string().bold().black().on_white()
+    );
+}
+pub fn get_pages_count(items_length: usize, items_per_page: i32) -> f64 {
+    (items_length as f64 / items_per_page as f64).ceil()
 }
