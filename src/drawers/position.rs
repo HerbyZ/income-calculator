@@ -1,10 +1,9 @@
 use colored::Colorize;
 use prettytable::{row, Table};
 
-use crate::{
-    models::{Action, Position},
-    utils::console::clear_screen,
-};
+use crate::models::{Action, Position};
+use crate::utils::console::clear_screen;
+use crate::utils::math::round;
 
 const ITEMS_PER_PAGE: i32 = 10;
 
@@ -37,15 +36,15 @@ impl PositionDrawer {
             let income_value = if self.position.action == order.action {
                 String::from("-")
             } else {
-                order.income.to_string()
+                round(order.income).unwrap().to_string()
             };
 
             table.add_row(row![
                 order.id,
                 order_type,
-                order.amount,
-                order.value,
-                order.price,
+                round(order.amount).unwrap(),
+                round(order.value).unwrap(),
+                round(order.price).unwrap(),
                 income_value
             ]);
         });
