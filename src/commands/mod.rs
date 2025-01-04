@@ -2,8 +2,13 @@ pub mod global;
 pub mod position;
 
 use crate::{exit_with_error, Position};
-use global::GlobalHandler;
-use position::PositionHandler;
+use global::GlobalCommandManager;
+use position::PositionCommandManager;
+
+pub enum ChangeEditMode {
+    EditPosition(Position),
+    PositionChanged(Position),
+}
 
 pub enum EditMode {
     Global,
@@ -13,13 +18,14 @@ pub enum EditMode {
 pub enum CommandResult {
     Ok,
     CommandNotFound,
-    ChangeEditMode(EditMode),
+    ChangeEditMode(ChangeEditMode),
     Error(String),
 }
 
 pub struct CommandHandler {
-    global_handler: GlobalHandler,
-    position_handler: Option<PositionHandler>,
+    global_handler: GlobalCommandManager,
+    position_handler: Option<PositionCommandManager>,
+    positions: Vec<Position>,
     edit_mode: EditMode,
 }
 
@@ -28,8 +34,9 @@ const DEFAULT_EDIT_MODE: EditMode = EditMode::Global;
 impl CommandHandler {
     pub fn new(initial_positions: Vec<Position>) -> CommandHandler {
         CommandHandler {
-            global_handler: GlobalHandler::new(initial_positions),
+            global_handler: GlobalCommandManager::new(initial_positions.clone()),
             position_handler: None,
+            positions: initial_positions,
             edit_mode: DEFAULT_EDIT_MODE,
         }
     }
@@ -79,13 +86,23 @@ impl CommandHandler {
         }
     }
 
-    fn change_edit_mode(&mut self, mode: EditMode) {
+    fn change_edit_mode(&mut self, mode: ChangeEditMode) {
         match mode {
-            EditMode::Position(pos) => {
-                self.position_handler = Some(PositionHandler::new(pos.clone()));
+            ChangeEditMode::EditPosition(pos) => {
+                self.position_handler = Some(PositionCommandManager::new(pos.clone()));
                 self.edit_mode = EditMode::Position(pos);
             }
-            _ => self.edit_mode = mode,
+            ChangeEditMode::PositionChanged(position) => {
+                let index = self
+                    .positions
+                    .iter()
+                    .position(|pos| pos.id == position.id)
+                    .expect("get index of changed position");
+
+                self.positions[index] = position.clone();
+                self.global_handler = GlobalCommandManager::new(self.positions.clone());
+                self.edit_mode = EditMode::Global;
+            }
         };
     }
 }

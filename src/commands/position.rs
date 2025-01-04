@@ -6,14 +6,14 @@ use crate::{exit_with_error, storage};
 use super::CommandResult;
 
 #[derive(Clone)]
-pub struct PositionHandler {
+pub struct PositionCommandManager {
     pub position: Position,
     pub drawer: PositionDrawer,
 }
 
-impl PositionHandler {
-    pub fn new(position: Position) -> PositionHandler {
-        PositionHandler {
+impl PositionCommandManager {
+    pub fn new(position: Position) -> PositionCommandManager {
+        PositionCommandManager {
             position: position.clone(),
             drawer: PositionDrawer::new(position),
         }
@@ -21,7 +21,9 @@ impl PositionHandler {
 
     pub fn handle_command(&mut self, command: String) -> CommandResult {
         match command.trim() {
-            "q" => CommandResult::ChangeEditMode(super::EditMode::Global),
+            "q" => CommandResult::ChangeEditMode(super::ChangeEditMode::PositionChanged(
+                self.position.clone(),
+            )),
             "a" => self.handle_add_order(),
             "n" => self.handle_next_page(),
             "p" => self.handle_previous_page(),

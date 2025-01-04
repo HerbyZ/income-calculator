@@ -4,14 +4,14 @@ use crate::models::{Action, Order, Position};
 use crate::utils::console::{ask_confirmation, ask_for_input, wait_for_enter, ConfirmationStatus};
 use crate::{exit_with_error, storage};
 
-pub struct GlobalHandler {
+pub struct GlobalCommandManager {
     pub drawer: GlobalDrawer,
     positions: Vec<Position>,
 }
 
-impl GlobalHandler {
-    pub fn new(initial_positions: Vec<Position>) -> GlobalHandler {
-        GlobalHandler {
+impl GlobalCommandManager {
+    pub fn new(initial_positions: Vec<Position>) -> GlobalCommandManager {
+        GlobalCommandManager {
             positions: initial_positions.clone(),
             drawer: GlobalDrawer::new(initial_positions.clone()),
         }
@@ -149,7 +149,7 @@ impl GlobalHandler {
             None => return CommandResult::Error(format!("Position with id '{}' not found", id)),
         };
 
-        CommandResult::ChangeEditMode(super::EditMode::Position(position))
+        CommandResult::ChangeEditMode(super::ChangeEditMode::EditPosition(position))
     }
 
     pub fn handle_help(&self) -> CommandResult {
