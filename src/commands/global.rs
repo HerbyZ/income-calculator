@@ -82,7 +82,7 @@ impl GlobalCommandManager {
             exit_with_error(error);
         }
 
-        CommandResult::Ok
+        CommandResult::UpdatePositions(self.positions.clone())
     }
 
     pub fn handle_next_page(&mut self) -> CommandResult {

@@ -19,6 +19,7 @@ pub enum CommandResult {
     Ok,
     CommandNotFound,
     ChangeEditMode(ChangeEditMode),
+    UpdatePositions(Vec<Position>),
     Error(String),
 }
 
@@ -79,6 +80,10 @@ impl CommandHandler {
             CommandResult::Ok => Ok(()),
             CommandResult::CommandNotFound => Ok(()),
             CommandResult::Error(error) => Err(error),
+            CommandResult::UpdatePositions(positions) => {
+                self.positions = positions;
+                Ok(())
+            }
             CommandResult::ChangeEditMode(mode) => {
                 self.change_edit_mode(mode);
                 Ok(())
