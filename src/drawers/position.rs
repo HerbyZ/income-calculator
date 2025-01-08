@@ -79,6 +79,8 @@ impl PositionDrawer {
         println!("{}", self.position.name.bold());
         position_table.printstd();
 
+        println!(); // Gap between tables
+
         println!("Position {} orders:", self.position.id.to_string().bold());
         orders_table.printstd();
         draw_page_counter(
