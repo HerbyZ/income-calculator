@@ -32,7 +32,7 @@ impl PositionCommandManager {
         }
     }
 
-    pub fn handle_add_order(&mut self) -> CommandResult {
+    fn handle_add_order(&mut self) -> CommandResult {
         let action_input = match ask_for_input::<String>("Enter order type (long/short)") {
             Ok(value) => value,
             Err(error) => return CommandResult::Error(error),
@@ -64,14 +64,14 @@ impl PositionCommandManager {
         CommandResult::Ok
     }
 
-    pub fn handle_next_page(&mut self) -> CommandResult {
+    fn handle_next_page(&mut self) -> CommandResult {
         match self.drawer.next_page() {
             Ok(()) => CommandResult::Ok,
             Err(error) => CommandResult::Error(error),
         }
     }
 
-    pub fn handle_previous_page(&mut self) -> CommandResult {
+    fn handle_previous_page(&mut self) -> CommandResult {
         match self.drawer.previous_page() {
             Ok(()) => CommandResult::Ok,
             Err(error) => CommandResult::Error(error),

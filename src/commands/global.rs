@@ -33,7 +33,7 @@ impl GlobalCommandManager {
         }
     }
 
-    pub fn handle_add_position(&mut self) -> CommandResult {
+    fn handle_add_position(&mut self) -> CommandResult {
         let name = match ask_for_input::<String>("Enter position name") {
             Ok(value) => value,
             Err(error) => return CommandResult::Error(error),
@@ -85,21 +85,21 @@ impl GlobalCommandManager {
         CommandResult::UpdatePositions(self.positions.clone())
     }
 
-    pub fn handle_next_page(&mut self) -> CommandResult {
+    fn handle_next_page(&mut self) -> CommandResult {
         match self.drawer.next_page() {
             Ok(()) => CommandResult::Ok,
             Err(error) => CommandResult::Error(error),
         }
     }
 
-    pub fn handle_previous_page(&mut self) -> CommandResult {
+    fn handle_previous_page(&mut self) -> CommandResult {
         match self.drawer.previous_page() {
             Ok(()) => CommandResult::Ok,
             Err(error) => CommandResult::Error(error),
         }
     }
 
-    pub fn handle_delete_position(&mut self) -> CommandResult {
+    fn handle_delete_position(&mut self) -> CommandResult {
         let id = match ask_for_input::<i32>("Enter position id") {
             Ok(value) => value,
             Err(error) => return CommandResult::Error(error),
@@ -138,7 +138,7 @@ impl GlobalCommandManager {
         CommandResult::Ok
     }
 
-    pub fn handle_edit_position(&self) -> CommandResult {
+    fn handle_edit_position(&self) -> CommandResult {
         let id = match ask_for_input::<i32>("Enter position id") {
             Ok(value) => value,
             Err(error) => return CommandResult::Error(error),
@@ -152,7 +152,7 @@ impl GlobalCommandManager {
         CommandResult::ChangeEditMode(super::ChangeEditMode::EditPosition(position))
     }
 
-    pub fn handle_help(&self) -> CommandResult {
+    fn handle_help(&self) -> CommandResult {
         self.drawer.draw_help_page();
         if let Err(error) = wait_for_enter() {
             return CommandResult::Error(error);
