@@ -1,6 +1,6 @@
 use crate::drawers::position::PositionDrawer;
 use crate::models::{Action, Order, Position};
-use crate::utils::console::{ask_confirmation, ask_for_input, ConfirmationStatus};
+use crate::utils::console::{ask_confirmation, ask_for_input, wait_for_enter, ConfirmationStatus};
 use crate::{exit_with_error, storage};
 
 use super::CommandResult;
@@ -26,6 +26,7 @@ impl PositionCommandManager {
             )),
             "a" => self.handle_add_order(),
             "d" => self.handle_delete_order(),
+            "h" => self.handle_help(),
             "n" => self.handle_next_page(),
             "p" => self.handle_previous_page(),
             _ => CommandResult::CommandNotFound,
@@ -102,6 +103,15 @@ impl PositionCommandManager {
         if let Err(error) = storage::save_position(self.position.clone()) {
             exit_with_error(error);
         };
+
+        CommandResult::Ok
+    }
+
+    fn handle_help(&self) -> CommandResult {
+        self.drawer.render_help_page();
+        if let Err(error) = wait_for_enter() {
+            return CommandResult::Error(error);
+        }
 
         CommandResult::Ok
     }
