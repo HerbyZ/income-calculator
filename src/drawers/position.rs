@@ -116,6 +116,25 @@ impl PositionDrawer {
         table.printstd();
     }
 
+    pub fn render_help_page(&self) {
+        clear_screen().expect("clear screen");
+        println!("{}\n", "Available commands:".bold());
+        println!("{} - {}", "h".bold().black().on_white(), "Show help page");
+        println!(
+            "{} - {}",
+            "q".bold().black().on_white(),
+            "Return to positions"
+        );
+        println!("{} - {}", "a".bold().black().on_white(), "Add new order");
+        println!("{} - {}", "d".bold().black().on_white(), "Delete order");
+        println!("{} - {}", "n".bold().black().on_white(), "Show next page");
+        println!(
+            "{} - {}",
+            "n".bold().black().on_white(),
+            "Show previous page"
+        );
+    }
+
     pub fn previous_page(&mut self) -> Result<(), String> {
         if self.page == 1 {
             Err(String::from("Already at first page"))
