@@ -14,8 +14,6 @@ pub struct Order {
 impl Order {
     pub fn new(pos: Position, action: Action, amount: f64, value: f64) -> Order {
         let price = value / amount;
-        println!("{price}");
-        println!("{}", pos.avg_price);
         let income = (price - pos.avg_price) * amount;
 
         let mut pos_orders_clone = pos.orders.clone();
