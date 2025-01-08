@@ -1,8 +1,10 @@
 use colored::Colorize;
 use prettytable::{row, Table};
 
-use crate::storage::Position;
+use crate::models::Position;
+use crate::utils::console::clear_screen;
 use crate::utils::math::round;
+use crate::utils::pagination::{draw_page_counter, get_pages_count, select_items_for_page};
 
 const ITEMS_PER_PAGE: i32 = 10;
 
@@ -16,17 +18,16 @@ impl GlobalDrawer {
         GlobalDrawer { positions, page: 1 }
     }
 
-    pub fn draw_table(&self) {
-        clear_screen();
+    pub fn render_positions_table(&self) {
+        clear_screen().expect("clear screen");
 
         let mut table = Table::new();
         table.add_row(row![
             "Id",
             "Name",
             "Amount",
-            "Value",
-            "Buy price",
-            "Sell price",
+            "Avg value",
+            "Avg price",
             "Income"
         ]);
 
@@ -41,15 +42,17 @@ impl GlobalDrawer {
                 position.id,
                 position.name,
                 round(position.amount).unwrap(),
-                round(position.value).unwrap(),
-                round(position.buy_price).unwrap(),
-                round(position.sell_price).unwrap(),
+                round(position.avg_value).unwrap(),
+                round(position.avg_price).unwrap(),
                 round(position.income).unwrap(),
             ]);
         });
 
         table.printstd();
-        self.draw_page_counter();
+        draw_page_counter(
+            self.page,
+            get_pages_count(self.positions.len(), ITEMS_PER_PAGE),
+        );
     }
 
     pub fn draw_single_position(&self, id: i32) -> Result<(), String> {
@@ -65,9 +68,8 @@ impl GlobalDrawer {
             "Id",
             "Name",
             "Amount",
-            "Value",
-            "Buy price",
-            "Sell price",
+            "Avg value",
+            "Avg price",
             "Income"
         ]);
 
@@ -75,9 +77,8 @@ impl GlobalDrawer {
             position.id,
             position.name,
             round(position.amount).unwrap(),
-            round(position.value).unwrap(),
-            round(position.buy_price).unwrap(),
-            round(position.sell_price).unwrap(),
+            round(position.avg_value).unwrap(),
+            round(position.avg_price).unwrap(),
             round(position.income).unwrap(),
         ]);
 
@@ -96,7 +97,7 @@ impl GlobalDrawer {
     }
 
     pub fn next_page(&mut self) -> Result<(), String> {
-        let max_page = self.get_pages_count();
+        let max_page = get_pages_count(self.positions.len(), ITEMS_PER_PAGE);
         if (self.page + 1) as f64 > max_page {
             Err(String::from("Already at last page"))
         } else {
@@ -110,12 +111,12 @@ impl GlobalDrawer {
     }
 
     pub fn draw_help_page(&self) {
-        clear_screen();
+        clear_screen().expect("clear screen");
         println!("{}\n", "Available commands:".bold());
         println!("{} - {}", "h".bold().black().on_white(), "Show help page");
         println!("{} - {}", "q".bold().black().on_white(), "Exit application");
         println!("{} - {}", "a".bold().black().on_white(), "Add new position");
-        println!("{} - {}", "c".bold().black().on_white(), "Close position");
+        println!("{} - {}", "e".bold().black().on_white(), "Edit position");
         println!("{} - {}", "d".bold().black().on_white(), "Delete position");
         println!("{} - {}", "n".bold().black().on_white(), "Show next page");
         println!(
@@ -126,47 +127,4 @@ impl GlobalDrawer {
 
         println!("\n{}", "Press Enter to continue...".italic().bright_black());
     }
-
-    fn draw_page_counter(&self) {
-        let pages_count: f64 = self.get_pages_count();
-        print!("Page ");
-
-        println!(
-            "{}{}{}",
-            self.page.to_string().bold().black().on_white(),
-            "/".black().on_white(),
-            pages_count.to_string().bold().black().on_white()
-        );
-    }
-
-    fn get_pages_count(&self) -> f64 {
-        (self.positions.len() as f64 / ITEMS_PER_PAGE as f64).ceil()
-    }
-}
-
-fn clear_screen() {
-    let term = console::Term::stdout();
-    term.clear_screen().expect("clear terminal screen");
-}
-
-fn select_items_for_page(
-    mut items: Vec<Position>,
-    page: i32,
-    items_per_page: i32,
-) -> Vec<Position> {
-    let split_index: usize = (items_per_page * (page - 1)).try_into().unwrap();
-    let splitted_items = items.split_off(split_index);
-
-    let mut result: Vec<Position> = vec![];
-    for i in 0..items_per_page - 1 {
-        let index: usize = i.try_into().unwrap();
-
-        if let Some(item) = splitted_items.get(index) {
-            result.push(item.clone());
-        } else {
-            break;
-        }
-    }
-
-    result
 }
