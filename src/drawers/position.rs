@@ -1,7 +1,7 @@
 use colored::Colorize;
 use prettytable::{row, Table};
 
-use crate::models::{Action, Position};
+use crate::models::{Action, Order, Position};
 use crate::utils::console::clear_screen;
 use crate::utils::math::round;
 use crate::utils::pagination::{draw_page_counter, get_pages_count};
@@ -85,6 +85,33 @@ impl PositionDrawer {
             self.page,
             get_pages_count(self.position.orders.len(), ITEMS_PER_PAGE),
         );
+    }
+
+    pub fn render_single_order_info(&self, order: Order) {
+        let order_type = match order.action {
+            Action::Long => "Buy",
+            Action::Short => "Sell",
+        };
+
+        let income_value = if self.position.action == order.action {
+            String::from("-")
+        } else {
+            round(order.income).unwrap().to_string()
+        };
+
+        let mut table = Table::new();
+        table.add_row(row!["Id", "Type", "Amount", "Value", "Price", "Income"]);
+
+        table.add_row(row![
+            order.id,
+            order_type,
+            round(order.amount).unwrap(),
+            round(order.value).unwrap(),
+            round(order.price).unwrap(),
+            income_value
+        ]);
+
+        table.printstd();
     }
 
     pub fn previous_page(&mut self) -> Result<(), String> {
