@@ -22,7 +22,14 @@ impl GlobalDrawer {
         clear_screen().expect("clear screen");
 
         let mut table = Table::new();
-        table.add_row(row!["Id", "Name", "Amount", "Value", "Avg price", "Income"]);
+        table.add_row(row![
+            "Id",
+            "Name",
+            "Amount",
+            "Avg value",
+            "Avg price",
+            "Income"
+        ]);
 
         let mut reversed_positions = self.positions.clone();
         reversed_positions.reverse();
@@ -35,7 +42,7 @@ impl GlobalDrawer {
                 position.id,
                 position.name,
                 round(position.amount).unwrap(),
-                round(position.value).unwrap(),
+                round(position.avg_value).unwrap(),
                 round(position.avg_price).unwrap(),
                 round(position.income).unwrap(),
             ]);
@@ -57,13 +64,20 @@ impl GlobalDrawer {
         let position = position_option.unwrap();
 
         let mut table = Table::new();
-        table.add_row(row!["Id", "Name", "Amount", "Value", "Avg price", "Income"]);
+        table.add_row(row![
+            "Id",
+            "Name",
+            "Amount",
+            "Avg value",
+            "Avg price",
+            "Income"
+        ]);
 
         table.add_row(row![
             position.id,
             position.name,
             round(position.amount).unwrap(),
-            round(position.value).unwrap(),
+            round(position.avg_value).unwrap(),
             round(position.avg_price).unwrap(),
             round(position.income).unwrap(),
         ]);

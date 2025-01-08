@@ -8,7 +8,7 @@ pub struct Position {
     pub action: Action,
     pub name: String,
     pub amount: f64,
-    pub value: f64,
+    pub avg_value: f64,
     pub avg_price: f64,
     pub income: f64,
     pub orders: Vec<Order>,
@@ -26,7 +26,7 @@ impl Position {
             amount: 0f64,
             avg_price: 0f64,
             income: 0f64,
-            value: 0f64,
+            avg_value: 0f64,
             orders: vec![],
         };
 
@@ -68,7 +68,7 @@ impl Position {
         });
 
         self.amount = new_amount;
-        self.value = new_amount * self.avg_price;
+        self.avg_value = new_amount * self.avg_price;
         self.income = new_income;
         self.orders = new_orders;
     }
@@ -109,12 +109,12 @@ mod tests {
         });
 
         /*
-        After adding these orders, 'amount' and 'value' should be equal to initial;
-        'avg_price' and 'income' should be recalculated to 7.5 and -25.
+        After adding these orders, 'amount' should be equal to initial;
+        'avg_price', 'avg_value' and 'income' should be recalculated to 7.5, 75 and -25.
         */
 
         assert_eq!(position.amount, 10f64);
-        assert_eq!(position.value, 100f64);
+        assert_eq!(position.avg_value, 75f64);
         assert_eq!(position.avg_price, 7.5f64);
         assert_eq!(position.income, -25f64);
     }

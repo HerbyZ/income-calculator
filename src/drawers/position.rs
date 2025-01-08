@@ -25,13 +25,20 @@ impl PositionDrawer {
 
     pub fn render_position_info(self) {
         let mut position_table = Table::new();
-        position_table.add_row(row!["Id", "Name", "Amount", "Value", "Avg price", "Income"]);
+        position_table.add_row(row![
+            "Id",
+            "Name",
+            "Amount",
+            "Avg value",
+            "Avg price",
+            "Income"
+        ]);
 
         position_table.add_row(row![
             self.position.id,
             self.position.name,
             round(self.position.amount).unwrap(),
-            round(self.position.value).unwrap(),
+            round(self.position.avg_value).unwrap(),
             round(self.position.avg_price).unwrap(),
             round(self.position.income).unwrap(),
         ]);
