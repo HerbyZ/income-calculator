@@ -74,7 +74,7 @@ impl PositionDrawer {
         print!("Position {} ", self.position.id);
         match self.position.action {
             Action::Long => print!("{} ", "Long".bold().green()),
-            Action::Short => todo!("{} ", "Short".bold().red()),
+            Action::Short => println!("{} ", "Short".bold().red()),
         }
         println!("{}", self.position.name.bold());
         position_table.printstd();

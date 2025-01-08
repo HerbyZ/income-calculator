@@ -1,4 +1,8 @@
+mod models;
+
 use std::path::Path;
+
+use models::PositionStorageModel;
 
 use crate::models::Position;
 
@@ -16,7 +20,12 @@ pub fn initialize_storage() -> Result<(), String> {
 }
 
 pub fn save_positions(positions: Vec<Position>) -> Result<(), String> {
-    let json_string = match serde_json::to_string(&positions) {
+    let mut position_models = vec![];
+    for pos in positions {
+        position_models.push(PositionStorageModel::from_model(pos))
+    }
+
+    let json_string = match serde_json::to_string(&position_models) {
         Ok(json) => json,
         Err(_) => return Err(String::from("Failed to serialize positions to json")),
     };
@@ -52,8 +61,18 @@ pub fn load_positions() -> Result<Vec<Position>, String> {
         Err(_) => return Err(String::from("Failed to read storage file")),
     };
 
-    match serde_json::from_str::<Vec<Position>>(&file_content) {
-        Ok(data) => Ok(data),
-        Err(_) => Err(String::from("Failed to deserialize positions from json")),
+    let position_models = match serde_json::from_str::<Vec<PositionStorageModel>>(&file_content) {
+        Ok(data) => data,
+        Err(_) => return Err(String::from("Failed to deserialize positions from json")),
+    };
+
+    let mut positions = vec![];
+    for storage_model in position_models {
+        positions.push(match storage_model.to_model() {
+            Ok(model) => model,
+            Err(error) => return Err(error),
+        });
     }
+
+    Ok(positions)
 }

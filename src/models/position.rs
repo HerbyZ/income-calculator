@@ -1,8 +1,6 @@
-use serde::{Deserialize, Serialize};
-
 use super::{Action, Order};
 
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug)]
 pub struct Position {
     pub id: i32,
     pub action: Action,
