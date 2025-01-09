@@ -2,6 +2,7 @@ pub mod global;
 pub mod position;
 
 mod drawers;
+mod utils;
 
 use crate::{exit_with_error, Position};
 use global::GlobalCommandManager;
@@ -63,9 +64,25 @@ impl CommandHandler {
         }
     }
 
-    pub fn handle_command(&mut self, command: String) -> Result<(), String> {
+    pub fn handle_command(&mut self, input: String) -> Result<(), String> {
+        let input_parts = input
+            .split(" ")
+            .map(|part| part.to_string())
+            .collect::<Vec<String>>();
+
+        let command = match input_parts.first() {
+            Some(value) => value.to_owned(),
+            None => return Err(String::from("No command specified")),
+        };
+
+        let arg = match input_parts.len() {
+            1 => None,
+            2 => input_parts.last(),
+            _ => return Err(String::from("Command can accept only 1 argument")),
+        };
+
         let result = match self.edit_mode {
-            EditMode::Global => self.global_handler.handle_command(command),
+            EditMode::Global => self.global_handler.handle_command(command, arg),
             EditMode::Position(_) => {
                 if self.position_handler.is_none() {
                     exit_with_error(String::from("Failed to draw position data"));
@@ -74,7 +91,7 @@ impl CommandHandler {
                 self.position_handler
                     .as_mut()
                     .unwrap()
-                    .handle_command(command)
+                    .handle_command(command, arg)
             }
         };
 

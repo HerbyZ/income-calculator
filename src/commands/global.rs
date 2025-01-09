@@ -1,4 +1,5 @@
 use super::drawers::GlobalDrawer;
+use super::utils::parse_arg_or_get_from_input;
 use super::CommandResult;
 use crate::models::{Action, Order, Position};
 use crate::utils::console::{ask_confirmation, ask_for_input, wait_for_enter, ConfirmationStatus};
@@ -17,14 +18,14 @@ impl GlobalCommandManager {
         }
     }
 
-    pub fn handle_command(&mut self, command: String) -> CommandResult {
+    pub fn handle_command(&mut self, command: String, arg: Option<&String>) -> CommandResult {
         match command.trim() {
             "q" => std::process::exit(0),
             "n" => self.handle_next_page(),
             "p" => self.handle_previous_page(),
             "a" => self.handle_add_position(),
-            "d" => self.handle_delete_position(),
-            "e" => self.handle_edit_position(),
+            "d" => self.handle_delete_position(arg),
+            "e" => self.handle_edit_position(arg),
             "h" => self.handle_help(),
             _ => {
                 self.drawer.render_positions_table();
@@ -99,8 +100,8 @@ impl GlobalCommandManager {
         }
     }
 
-    fn handle_delete_position(&mut self) -> CommandResult {
-        let id = match ask_for_input::<i32>("Enter position id") {
+    fn handle_delete_position(&mut self, arg: Option<&String>) -> CommandResult {
+        let id = match parse_arg_or_get_from_input::<i32>(arg) {
             Ok(value) => value,
             Err(error) => return CommandResult::Error(error),
         };
@@ -138,8 +139,8 @@ impl GlobalCommandManager {
         CommandResult::Ok
     }
 
-    fn handle_edit_position(&self) -> CommandResult {
-        let id = match ask_for_input::<i32>("Enter position id") {
+    fn handle_edit_position(&self, arg: Option<&String>) -> CommandResult {
+        let id = match parse_arg_or_get_from_input::<i32>(arg) {
             Ok(value) => value,
             Err(error) => return CommandResult::Error(error),
         };
