@@ -2,7 +2,7 @@ mod models;
 
 use std::path::Path;
 
-use models::PositionStorageModel;
+use models::{FromModel, PositionStorageModel, ToModel};
 
 use crate::models::Position;
 

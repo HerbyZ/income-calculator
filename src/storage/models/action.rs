@@ -2,21 +2,25 @@ use serde::{Deserialize, Serialize};
 
 use crate::models::Action;
 
+use super::{FromModel, ToModel};
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub enum ActionStorageModel {
     L,
     S,
 }
 
-impl ActionStorageModel {
-    pub fn to_model(&self) -> Action {
+impl ToModel<Action> for ActionStorageModel {
+    fn to_model(&self) -> Result<Action, String> {
         match self {
-            ActionStorageModel::L => Action::Long,
-            ActionStorageModel::S => Action::Short,
+            ActionStorageModel::L => Ok(Action::Long),
+            ActionStorageModel::S => Ok(Action::Short),
         }
     }
+}
 
-    pub fn from_model(model: Action) -> ActionStorageModel {
+impl FromModel<Action> for ActionStorageModel {
+    fn from_model(model: Action) -> ActionStorageModel {
         match model {
             Action::Long => ActionStorageModel::L,
             Action::Short => ActionStorageModel::S,
