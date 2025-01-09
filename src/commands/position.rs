@@ -34,7 +34,7 @@ impl PositionCommandManager {
     }
 
     fn handle_add_order(&mut self) -> CommandResult {
-        let action_input = match ask_for_input::<String>("Enter order type (long/short)") {
+        let action_input = match ask_for_input::<String>("Enter order type (buy/sell)") {
             Ok(value) => value,
             Err(error) => return CommandResult::Error(error),
         };
