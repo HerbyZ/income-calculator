@@ -1,6 +1,8 @@
 pub mod global;
 pub mod position;
 
+mod drawers;
+
 use crate::{exit_with_error, Position};
 use global::GlobalCommandManager;
 use position::PositionCommandManager;

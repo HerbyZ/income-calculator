@@ -1,5 +1,4 @@
 pub mod commands;
-pub mod drawers;
 pub mod models;
 pub mod storage;
 pub mod utils;
