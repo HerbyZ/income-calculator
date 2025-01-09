@@ -135,6 +135,7 @@ impl PositionDrawer {
             "Show next page"
         );
         println!("{} - {}", "n".bold().yellow(), "Show previous page");
+        println!();
     }
 
     pub fn previous_page(&mut self) -> Result<(), String> {

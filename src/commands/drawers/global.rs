@@ -130,7 +130,6 @@ impl GlobalDrawer {
         );
         println!("{} - {}", "n".bold().yellow(), "Show next page");
         println!("{} - {}", "n".bold().yellow(), "Show previous page");
-
-        println!("\n{}", "Press Enter to continue...".italic().bright_black());
+        println!();
     }
 }

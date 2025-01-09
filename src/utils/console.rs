@@ -46,7 +46,7 @@ pub fn ask_confirmation(
 }
 
 pub fn wait_for_enter() -> Result<(), String> {
-    println!("{}", "Press enter to continue".italic().bright_black());
+    println!("{}", "Press enter to continue...".italic().bright_black());
     let mut s = String::new();
     if let Err(_) = std::io::stdin().read_line(&mut s) {
         return Err(String::from("Failed to read input from console"));
