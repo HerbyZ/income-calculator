@@ -119,30 +119,22 @@ impl PositionDrawer {
     pub fn render_help_page(&self) {
         clear_screen().expect("clear screen");
         println!("{}\n", "Available commands:".bold());
-        println!("{} - {}", "h".bold().black().on_white(), "Show help page");
-        println!(
-            "{} - {}",
-            "q".bold().black().on_white(),
-            "Return to positions"
-        );
-        println!("{} - {}", "a".bold().black().on_white(), "Add new order");
+        println!("{} - {}", "h".bold().yellow(), "Show help page");
+        println!("{} - {}", "q".bold().yellow(), "Return to positions");
+        println!("{} - {}", "a".bold().yellow(), "Add new order");
         println!(
             "{} {} - {}",
-            "d".bold().black().on_white(),
+            "d".bold().yellow(),
             "[id]".bold(),
             "Delete order"
         );
         println!(
             "{} {} - {}",
-            "n".bold().black().on_white(),
+            "n".bold().yellow(),
             "[id]".bold(),
             "Show next page"
         );
-        println!(
-            "{} - {}",
-            "n".bold().black().on_white(),
-            "Show previous page"
-        );
+        println!("{} - {}", "n".bold().yellow(), "Show previous page");
     }
 
     pub fn previous_page(&mut self) -> Result<(), String> {
