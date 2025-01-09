@@ -126,8 +126,18 @@ impl PositionDrawer {
             "Return to positions"
         );
         println!("{} - {}", "a".bold().black().on_white(), "Add new order");
-        println!("{} - {}", "d".bold().black().on_white(), "Delete order");
-        println!("{} - {}", "n".bold().black().on_white(), "Show next page");
+        println!(
+            "{} {} - {}",
+            "d".bold().black().on_white(),
+            "[id]".bold(),
+            "Delete order"
+        );
+        println!(
+            "{} {} - {}",
+            "n".bold().black().on_white(),
+            "[id]".bold(),
+            "Show next page"
+        );
         println!(
             "{} - {}",
             "n".bold().black().on_white(),
