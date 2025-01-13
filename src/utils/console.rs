@@ -59,3 +59,11 @@ pub fn clear_screen() -> std::io::Result<()> {
     let term = console::Term::stdout();
     term.clear_screen()
 }
+
+pub fn print_error(error: String) {
+    println!(
+        "{}{}",
+        "ERROR: ".bold().white().on_red(),
+        error.bold().white().on_red()
+    );
+}
