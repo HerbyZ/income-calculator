@@ -2,7 +2,7 @@ use std::str::FromStr;
 
 use crate::utils::console::ask_for_input;
 
-pub fn parse_arg_or_get_from_input<T>(arg: Option<&String>) -> Result<T, String>
+pub fn parse_arg_or_get_from_input<T>(arg: Option<&String>, question: &str) -> Result<T, String>
 where
     T: FromStr,
 {
@@ -13,7 +13,7 @@ where
             Err(_) => return Err(format!("Failed to parse answer '{}'", arg.trim())),
         }
     } else {
-        match ask_for_input::<T>("Enter position id") {
+        match ask_for_input::<T>(question) {
             Ok(value) => Ok(value),
             Err(error) => return Err(error),
         }

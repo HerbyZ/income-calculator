@@ -67,7 +67,7 @@ impl PositionCommandManager {
     }
 
     fn handle_delete_order(&mut self, arg: Option<&String>) -> CommandResult {
-        let id = match parse_arg_or_get_from_input::<i32>(arg) {
+        let id = match parse_arg_or_get_from_input::<i32>(arg, "Enter position id") {
             Ok(value) => value,
             Err(error) => return CommandResult::Error(error),
         };
