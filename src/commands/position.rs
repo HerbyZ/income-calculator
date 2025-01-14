@@ -1,4 +1,5 @@
 use super::drawers::PositionDrawer;
+use super::utils::parse_arg_or_get_from_input;
 use crate::models::{Action, Order, Position};
 use crate::utils::console::{ask_confirmation, ask_for_input, wait_for_enter, ConfirmationStatus};
 use crate::{exit_with_error, storage};
@@ -8,7 +9,7 @@ use super::CommandResult;
 #[derive(Clone)]
 pub struct PositionCommandManager {
     pub position: Position,
-    pub drawer: PositionDrawer,
+    drawer: PositionDrawer,
 }
 
 impl PositionCommandManager {
@@ -19,13 +20,13 @@ impl PositionCommandManager {
         }
     }
 
-    pub fn handle_command(&mut self, command: String) -> CommandResult {
+    pub fn handle_command(&mut self, command: String, arg: Option<&String>) -> CommandResult {
         match command.trim() {
             "q" => CommandResult::ChangeEditMode(super::ChangeEditMode::PositionChanged(
                 self.position.clone(),
             )),
             "a" => self.handle_add_order(),
-            "d" => self.handle_delete_order(),
+            "d" => self.handle_delete_order(arg),
             "h" => self.handle_help(),
             "n" => self.handle_next_page(),
             "p" => self.handle_previous_page(),
@@ -33,8 +34,13 @@ impl PositionCommandManager {
         }
     }
 
+    pub fn show_ui(&self) {
+        self.drawer.clone().render_position_info();
+        self.drawer.draw_help_tooltip();
+    }
+
     fn handle_add_order(&mut self) -> CommandResult {
-        let action_input = match ask_for_input::<String>("Enter order type (long/short)") {
+        let action_input = match ask_for_input::<String>("Enter order type (buy/sell)") {
             Ok(value) => value,
             Err(error) => return CommandResult::Error(error),
         };
@@ -65,8 +71,8 @@ impl PositionCommandManager {
         CommandResult::Ok
     }
 
-    fn handle_delete_order(&mut self) -> CommandResult {
-        let id = match ask_for_input::<i32>("Enter order id") {
+    fn handle_delete_order(&mut self, arg: Option<&String>) -> CommandResult {
+        let id = match parse_arg_or_get_from_input::<i32>(arg, "Enter position id") {
             Ok(value) => value,
             Err(error) => return CommandResult::Error(error),
         };

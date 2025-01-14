@@ -113,18 +113,23 @@ impl GlobalDrawer {
     pub fn draw_help_page(&self) {
         clear_screen().expect("clear screen");
         println!("{}\n", "Available commands:".bold());
-        println!("{} - {}", "h".bold().black().on_white(), "Show help page");
-        println!("{} - {}", "q".bold().black().on_white(), "Exit application");
-        println!("{} - {}", "a".bold().black().on_white(), "Add new position");
-        println!("{} - {}", "e".bold().black().on_white(), "Edit position");
-        println!("{} - {}", "d".bold().black().on_white(), "Delete position");
-        println!("{} - {}", "n".bold().black().on_white(), "Show next page");
+        println!("{} - {}", "h".bold().yellow(), "Show help page");
+        println!("{} - {}", "q".bold().yellow(), "Exit application");
+        println!("{} - {}", "a".bold().yellow(), "Add new position");
         println!(
-            "{} - {}",
-            "n".bold().black().on_white(),
-            "Show previous page"
+            "{} {} - {}",
+            "e".bold().yellow(),
+            "[id]".bold(),
+            "Edit position"
         );
-
-        println!("\n{}", "Press Enter to continue...".italic().bright_black());
+        println!(
+            "{} {} - {}",
+            "d".bold().yellow(),
+            "[id]".bold(),
+            "Delete position"
+        );
+        println!("{} - {}", "n".bold().yellow(), "Show next page");
+        println!("{} - {}", "n".bold().yellow(), "Show previous page");
+        println!();
     }
 }

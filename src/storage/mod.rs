@@ -19,6 +19,13 @@ pub fn initialize_storage() -> Result<(), String> {
     }
 }
 
+pub fn reinitialize_storage() -> Result<(), String> {
+    match std::fs::write(STORAGE_FILE_PATH, "[]") {
+        Ok(_) => Ok(()),
+        Err(_) => Err(String::from("Failed to write initial storage file")),
+    }
+}
+
 pub fn save_positions(positions: Vec<Position>) -> Result<(), String> {
     let mut position_models = vec![];
     for pos in positions {
