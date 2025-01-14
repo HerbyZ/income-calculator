@@ -6,7 +6,7 @@ use crate::utils::console::{ask_confirmation, ask_for_input, wait_for_enter, Con
 use crate::{exit_with_error, storage};
 
 pub struct GlobalCommandManager {
-    pub drawer: GlobalDrawer,
+    drawer: GlobalDrawer,
     positions: Vec<Position>,
 }
 
@@ -32,6 +32,11 @@ impl GlobalCommandManager {
                 CommandResult::CommandNotFound
             }
         }
+    }
+
+    pub fn show_ui(&self) {
+        self.drawer.render_positions_table();
+        self.drawer.draw_help_tooltip();
     }
 
     fn handle_add_position(&mut self) -> CommandResult {

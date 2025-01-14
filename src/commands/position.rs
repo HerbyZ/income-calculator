@@ -9,7 +9,7 @@ use super::CommandResult;
 #[derive(Clone)]
 pub struct PositionCommandManager {
     pub position: Position,
-    pub drawer: PositionDrawer,
+    drawer: PositionDrawer,
 }
 
 impl PositionCommandManager {
@@ -32,6 +32,11 @@ impl PositionCommandManager {
             "p" => self.handle_previous_page(),
             _ => CommandResult::CommandNotFound,
         }
+    }
+
+    pub fn show_ui(&self) {
+        self.drawer.clone().render_position_info();
+        self.drawer.draw_help_tooltip();
     }
 
     fn handle_add_order(&mut self) -> CommandResult {

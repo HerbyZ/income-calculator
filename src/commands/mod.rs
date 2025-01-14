@@ -48,18 +48,14 @@ impl CommandHandler {
     pub fn show_ui(&self) {
         match self.edit_mode {
             EditMode::Global => {
-                self.global_handler.drawer.render_positions_table();
-                self.global_handler.drawer.draw_help_tooltip();
+                self.global_handler.show_ui();
             }
             EditMode::Position(_) => {
                 if self.position_handler.is_none() {
                     exit_with_error(String::from("Failed to draw position data"));
                 }
 
-                let drawer = self.position_handler.clone().unwrap().drawer;
-
-                drawer.clone().render_position_info();
-                drawer.draw_help_tooltip();
+                self.position_handler.as_ref().unwrap().show_ui();
             }
         }
     }
