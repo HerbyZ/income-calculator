@@ -1,12 +1,11 @@
 use colored::Colorize;
 use prettytable::{row, Table};
 
+use crate::constants::POISITIONS_PER_PAGE;
 use crate::models::Position;
 use crate::utils::console::clear_screen;
 use crate::utils::math::round;
 use crate::utils::pagination::{draw_page_counter, get_pages_count, select_items_for_page};
-
-const ITEMS_PER_PAGE: i32 = 10;
 
 pub struct GlobalDrawer {
     page: i32,
@@ -35,7 +34,7 @@ impl GlobalDrawer {
         reversed_positions.reverse();
 
         let positions_to_draw =
-            select_items_for_page(reversed_positions, self.page, ITEMS_PER_PAGE);
+            select_items_for_page(reversed_positions, self.page, POISITIONS_PER_PAGE);
 
         positions_to_draw.iter().for_each(|position| {
             table.add_row(row![
@@ -55,7 +54,7 @@ impl GlobalDrawer {
         table.printstd();
         draw_page_counter(
             self.page,
-            get_pages_count(self.positions.len(), ITEMS_PER_PAGE),
+            get_pages_count(self.positions.len(), POISITIONS_PER_PAGE),
         );
     }
 
@@ -101,7 +100,7 @@ impl GlobalDrawer {
     }
 
     pub fn next_page(&mut self) -> Result<(), String> {
-        let max_page = get_pages_count(self.positions.len(), ITEMS_PER_PAGE);
+        let max_page = get_pages_count(self.positions.len(), POISITIONS_PER_PAGE);
         if (self.page + 1) as f64 > max_page {
             Err(String::from("Already at last page"))
         } else {
