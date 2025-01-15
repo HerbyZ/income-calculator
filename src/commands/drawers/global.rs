@@ -48,6 +48,10 @@ impl GlobalDrawer {
             ]);
         });
 
+        // Add total row
+        let total = calculate_total(&self.positions);
+        table.add_row(row!["Total", "-", "-", total.value, "-", total.income,]);
+
         table.printstd();
         draw_page_counter(
             self.page,
@@ -132,4 +136,23 @@ impl GlobalDrawer {
         println!("{} - {}", "n".bold().yellow(), "Show previous page");
         println!();
     }
+}
+
+struct Total {
+    value: f64,
+    income: f64,
+}
+
+fn calculate_total(positions: &Vec<Position>) -> Total {
+    let mut total = Total {
+        income: 0f64,
+        value: 0f64,
+    };
+
+    for pos in positions {
+        total.income += pos.income;
+        total.value += pos.avg_value;
+    }
+
+    total
 }
