@@ -49,7 +49,14 @@ impl GlobalDrawer {
 
         // Add total row
         let total = calculate_total(&self.positions);
-        table.add_row(row!["Total", "-", "-", total.value, "-", total.income,]);
+        table.add_row(row![
+            "Total",
+            "-",
+            "-",
+            round(total.value).unwrap(),
+            "-",
+            round(total.income).unwrap()
+        ]);
 
         table.printstd();
         draw_page_counter(
