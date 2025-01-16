@@ -11,10 +11,10 @@ pub struct GlobalCommandManager {
 }
 
 impl GlobalCommandManager {
-    pub fn new(initial_positions: Vec<Position>) -> GlobalCommandManager {
+    pub fn new(initial_positions: &Vec<Position>) -> GlobalCommandManager {
         GlobalCommandManager {
-            positions: initial_positions.clone(),
-            drawer: GlobalDrawer::new(initial_positions.clone()),
+            positions: initial_positions.to_vec(),
+            drawer: GlobalDrawer::new(&initial_positions),
         }
     }
 
@@ -82,13 +82,13 @@ impl GlobalCommandManager {
         self.positions
             .push(Position::new(id, name, vec![first_order]));
 
-        self.drawer.positions = self.positions.clone();
+        self.drawer.positions = self.positions.to_vec();
 
-        if let Err(error) = storage::save_positions(self.positions.clone()) {
+        if let Err(error) = storage::save_positions(&self.positions) {
             exit_with_error(error);
         }
 
-        CommandResult::UpdatePositions(self.positions.clone())
+        CommandResult::UpdatePositions(self.positions.to_vec())
     }
 
     fn handle_next_page(&mut self) -> CommandResult {
@@ -134,10 +134,10 @@ impl GlobalCommandManager {
 
         let pos_index = pos_index_option.unwrap();
 
-        let mut new_positions = self.positions.clone();
+        let mut new_positions = self.positions.to_vec();
         new_positions.remove(pos_index);
 
-        if let Err(error) = self.update_positions(new_positions) {
+        if let Err(error) = self.update_positions(&new_positions) {
             exit_with_error(error);
         }
 
@@ -167,9 +167,9 @@ impl GlobalCommandManager {
         CommandResult::Ok
     }
 
-    fn update_positions(&mut self, positions: Vec<Position>) -> Result<(), String> {
-        self.positions = positions.clone();
-        self.drawer.positions = positions.clone();
-        storage::save_positions(positions)
+    fn update_positions(&mut self, positions: &Vec<Position>) -> Result<(), String> {
+        self.positions = positions.to_vec();
+        self.drawer.positions = positions.to_vec();
+        storage::save_positions(&positions)
     }
 }

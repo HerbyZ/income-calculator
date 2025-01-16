@@ -25,9 +25,9 @@ pub fn reinitialize_storage() -> Result<(), String> {
     }
 }
 
-pub fn save_positions(positions: Vec<Position>) -> Result<(), String> {
+pub fn save_positions(positions: &Vec<Position>) -> Result<(), String> {
     let mut position_models = vec![];
-    for pos in positions {
+    for pos in positions.to_vec() {
         position_models.push(PositionStorageModel::from_model(pos))
     }
 
@@ -58,7 +58,7 @@ pub fn save_position(position: Position) -> Result<(), String> {
 
     positions[pos_index] = position;
 
-    save_positions(positions)
+    save_positions(&positions)
 }
 
 pub fn load_positions() -> Result<Vec<Position>, String> {

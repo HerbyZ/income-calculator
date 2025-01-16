@@ -13,9 +13,9 @@ pub struct PositionCommandManager {
 }
 
 impl PositionCommandManager {
-    pub fn new(position: Position) -> PositionCommandManager {
+    pub fn new(position: &Position) -> PositionCommandManager {
         PositionCommandManager {
-            position: position.clone(),
+            position: position.to_owned(),
             drawer: PositionDrawer::new(position),
         }
     }
@@ -35,7 +35,7 @@ impl PositionCommandManager {
     }
 
     pub fn show_ui(&self) {
-        self.drawer.clone().render_position_info();
+        self.drawer.render_position_info();
         self.drawer.draw_help_tooltip();
     }
 
@@ -87,7 +87,7 @@ impl PositionCommandManager {
             }
         };
 
-        self.drawer.render_single_order_info(order.clone());
+        self.drawer.render_single_order_info(order);
 
         let confirmation = match ask_confirmation(
             format!("Are you sure want to delete order {}? (y,N)", { id }).as_str(),

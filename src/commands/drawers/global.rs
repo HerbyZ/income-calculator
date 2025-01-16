@@ -13,8 +13,11 @@ pub struct GlobalDrawer {
 }
 
 impl GlobalDrawer {
-    pub fn new(positions: Vec<Position>) -> GlobalDrawer {
-        GlobalDrawer { positions, page: 1 }
+    pub fn new(positions: &Vec<Position>) -> GlobalDrawer {
+        GlobalDrawer {
+            positions: positions.to_vec(),
+            page: 1,
+        }
     }
 
     pub fn render_positions_table(&self) {
@@ -30,7 +33,7 @@ impl GlobalDrawer {
             "Income"
         ]);
 
-        let mut reversed_positions = self.positions.clone();
+        let mut reversed_positions = self.positions.to_vec();
         reversed_positions.reverse();
 
         let positions_to_draw =

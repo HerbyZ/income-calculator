@@ -14,15 +14,18 @@ pub struct PositionDrawer {
 }
 
 impl PositionDrawer {
-    pub fn new(position: Position) -> PositionDrawer {
-        PositionDrawer { position, page: 1 }
+    pub fn new(position: &Position) -> PositionDrawer {
+        PositionDrawer {
+            position: position.to_owned(),
+            page: 1,
+        }
     }
 
     pub fn set_position(&mut self, position: Position) {
         self.position = position;
     }
 
-    pub fn render_position_info(self) {
+    pub fn render_position_info(&self) {
         let mut position_table = Table::new();
         position_table.add_row(row![
             "Id",

@@ -1,6 +1,6 @@
 use super::{Action, Position};
 
-#[derive(Clone, Debug)]
+#[derive(Debug, Clone, Copy)]
 pub struct Order {
     pub id: i32,
     pub action: Action,
@@ -15,7 +15,7 @@ impl Order {
         let price = value / amount;
         let income = (price - pos.avg_price) * amount;
 
-        let mut pos_orders_clone = pos.orders.clone();
+        let mut pos_orders_clone = pos.orders.to_vec();
         pos_orders_clone.sort_by(|first, second| first.id.cmp(&second.id));
         let id = pos_orders_clone.last().unwrap().id + 1;
 

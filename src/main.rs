@@ -48,7 +48,7 @@ fn main() {
         Err(error) => handle_load_initial_positions_error(error),
     };
 
-    let mut command_handler = CommandHandler::new(initial_positions);
+    let mut command_handler = CommandHandler::new(&initial_positions);
     let stdin = std::io::stdin();
 
     command_handler.show_ui();

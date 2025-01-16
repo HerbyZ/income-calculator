@@ -1,6 +1,6 @@
 use super::{Action, Order};
 
-#[derive(Clone, Debug)]
+#[derive(Debug, Clone)]
 pub struct Position {
     pub id: i32,
     pub action: Action,
@@ -15,7 +15,7 @@ pub struct Position {
 impl Position {
     pub fn new(id: i32, name: String, mut orders: Vec<Order>) -> Position {
         orders.sort_by(|first, second| first.id.cmp(&second.id));
-        let first_order = orders.first().unwrap().clone();
+        let first_order = orders.first().unwrap();
 
         let mut pos = Position {
             id,
@@ -39,8 +39,8 @@ impl Position {
         let mut same_action_prices_sum = 0f64;
         let mut same_action_orders_count = 0f64;
 
-        let mut new_orders = self.orders.clone();
-        new_orders.push(order.clone());
+        let mut new_orders = self.orders.to_vec();
+        new_orders.push(order);
 
         let mut new_amount = 0f64;
 
@@ -86,7 +86,7 @@ impl Position {
             }
         };
 
-        let mut new_orders = self.orders.clone();
+        let mut new_orders = self.orders.to_vec();
         new_orders.remove(order_index);
 
         self.orders = vec![];

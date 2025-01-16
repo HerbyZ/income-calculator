@@ -14,7 +14,7 @@ pub struct PositionStorageModel {
 
 impl ToModel<Position> for PositionStorageModel {
     fn to_model(&self) -> Result<Position, String> {
-        let mut orders = self.orders.clone();
+        let mut orders = self.orders.to_vec();
         orders.sort_by(|first, second| first.id.cmp(&second.id));
 
         let first_order_model = match orders.first() {
