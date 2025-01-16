@@ -4,9 +4,8 @@ use std::path::Path;
 
 use models::{FromModel, PositionStorageModel, ToModel};
 
+use crate::constants::STORAGE_FILE_PATH;
 use crate::models::Position;
-
-const STORAGE_FILE_PATH: &str = "./storage.json";
 
 pub fn initialize_storage() -> Result<(), String> {
     if Path::new(STORAGE_FILE_PATH).exists() {

@@ -1,12 +1,11 @@
 use colored::Colorize;
 use prettytable::{row, Table};
 
+use crate::constants::ORDERS_PER_PAGE;
 use crate::models::{Action, Order, Position};
 use crate::utils::console::clear_screen;
 use crate::utils::math::round;
 use crate::utils::pagination::{draw_page_counter, get_pages_count};
-
-const ITEMS_PER_PAGE: i32 = 10;
 
 #[derive(Clone)]
 pub struct PositionDrawer {
@@ -85,7 +84,7 @@ impl PositionDrawer {
         orders_table.printstd();
         draw_page_counter(
             self.page,
-            get_pages_count(self.position.orders.len(), ITEMS_PER_PAGE),
+            get_pages_count(self.position.orders.len(), ORDERS_PER_PAGE),
         );
     }
 
@@ -148,7 +147,7 @@ impl PositionDrawer {
     }
 
     pub fn next_page(&mut self) -> Result<(), String> {
-        let max_page = get_pages_count(self.position.orders.len(), ITEMS_PER_PAGE);
+        let max_page = get_pages_count(self.position.orders.len(), ORDERS_PER_PAGE);
         if (self.page + 1) as f64 > max_page {
             Err(String::from("Already at last page"))
         } else {
