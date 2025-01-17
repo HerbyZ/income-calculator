@@ -1,12 +1,10 @@
-pub mod global;
-pub mod position;
+pub mod managers;
 
 mod drawers;
 mod utils;
 
 use crate::{exit_with_error, Position};
-use global::GlobalCommandManager;
-use position::PositionCommandManager;
+use managers::{GlobalCommandManager, PositionCommandManager};
 
 pub enum ChangeEditMode {
     EditPosition(Position),

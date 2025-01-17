@@ -1,6 +1,7 @@
-use super::drawers::GlobalDrawer;
-use super::utils::parse_arg_or_get_from_input;
-use super::CommandResult;
+use super::super::drawers::GlobalDrawer;
+use super::super::utils::parse_arg_or_get_from_input;
+use super::super::ChangeEditMode;
+use super::super::CommandResult;
 use crate::models::{Action, Order, Position};
 use crate::utils::console::{ask_confirmation, ask_for_input, wait_for_enter, ConfirmationStatus};
 use crate::{exit_with_error, storage};
@@ -155,7 +156,7 @@ impl GlobalCommandManager {
             None => return CommandResult::Error(format!("Position with id '{}' not found", id)),
         };
 
-        CommandResult::ChangeEditMode(super::ChangeEditMode::EditPosition(position))
+        CommandResult::ChangeEditMode(ChangeEditMode::EditPosition(position))
     }
 
     fn handle_help(&self) -> CommandResult {

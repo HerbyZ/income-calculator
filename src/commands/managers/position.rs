@@ -1,10 +1,11 @@
-use super::drawers::PositionDrawer;
-use super::utils::parse_arg_or_get_from_input;
+use super::super::drawers::PositionDrawer;
+use super::super::utils::parse_arg_or_get_from_input;
+use super::super::ChangeEditMode;
 use crate::models::{Action, Order, Position};
 use crate::utils::console::{ask_confirmation, ask_for_input, wait_for_enter, ConfirmationStatus};
 use crate::{exit_with_error, storage};
 
-use super::CommandResult;
+use super::super::CommandResult;
 
 #[derive(Clone)]
 pub struct PositionCommandManager {
@@ -22,7 +23,7 @@ impl PositionCommandManager {
 
     pub fn handle_command(&mut self, command: String, arg: Option<&String>) -> CommandResult {
         match command.trim() {
-            "q" => CommandResult::ChangeEditMode(super::ChangeEditMode::PositionChanged(
+            "q" => CommandResult::ChangeEditMode(ChangeEditMode::PositionChanged(
                 self.position.clone(),
             )),
             "a" => self.handle_add_order(),
