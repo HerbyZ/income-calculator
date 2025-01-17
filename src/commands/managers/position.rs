@@ -1,8 +1,10 @@
-use super::super::drawers::PositionDrawer;
 use super::super::utils::parse_arg_or_get_from_input;
 use super::super::ChangeEditMode;
+use crate::commands::ui::render;
+use crate::constants::ORDERS_PER_PAGE;
 use crate::models::{Action, Order, Position};
 use crate::utils::console::{ask_confirmation, ask_for_input, wait_for_enter, ConfirmationStatus};
+use crate::utils::pagination::get_pages_count;
 use crate::{exit_with_error, storage};
 
 use super::super::CommandResult;
@@ -10,14 +12,14 @@ use super::super::CommandResult;
 #[derive(Clone)]
 pub struct PositionCommandManager {
     pub position: Position,
-    drawer: PositionDrawer,
+    page: i32,
 }
 
 impl PositionCommandManager {
     pub fn new(position: &Position) -> PositionCommandManager {
         PositionCommandManager {
             position: position.to_owned(),
-            drawer: PositionDrawer::new(position),
+            page: 1,
         }
     }
 
@@ -36,8 +38,8 @@ impl PositionCommandManager {
     }
 
     pub fn show_ui(&self) {
-        self.drawer.render_position_info();
-        self.drawer.draw_help_tooltip();
+        render::render_position_info(&self.position, self.page);
+        render::render_help_tooltip();
     }
 
     fn handle_add_order(&mut self) -> CommandResult {
@@ -64,7 +66,6 @@ impl PositionCommandManager {
         let order = Order::new(self.position.clone(), action, amount, value);
         self.position.add_order(order);
 
-        self.drawer.set_position(self.position.clone());
         if let Err(error) = storage::save_position(self.position.clone()) {
             exit_with_error(error);
         };
@@ -88,7 +89,7 @@ impl PositionCommandManager {
             }
         };
 
-        self.drawer.render_single_order_info(order);
+        render::render_single_order(&self.position, &order);
 
         let confirmation = match ask_confirmation(
             format!("Are you sure want to delete order {}? (y,N)", { id }).as_str(),
@@ -106,7 +107,6 @@ impl PositionCommandManager {
             return CommandResult::Error(error);
         }
 
-        self.drawer.set_position(self.position.clone());
         if let Err(error) = storage::save_position(self.position.clone()) {
             exit_with_error(error);
         };
@@ -115,7 +115,7 @@ impl PositionCommandManager {
     }
 
     fn handle_help(&self) -> CommandResult {
-        self.drawer.render_help_page();
+        render::render_edit_position_help_page();
         if let Err(error) = wait_for_enter() {
             return CommandResult::Error(error);
         }
@@ -124,16 +124,21 @@ impl PositionCommandManager {
     }
 
     fn handle_next_page(&mut self) -> CommandResult {
-        match self.drawer.next_page() {
-            Ok(()) => CommandResult::Ok,
-            Err(error) => CommandResult::Error(error),
+        let max_page = get_pages_count(self.position.orders.len(), ORDERS_PER_PAGE);
+        if (self.page + 1) as f64 > max_page {
+            CommandResult::Error(String::from("Already at last page"))
+        } else {
+            self.page += 1;
+            CommandResult::Ok
         }
     }
 
     fn handle_previous_page(&mut self) -> CommandResult {
-        match self.drawer.previous_page() {
-            Ok(()) => CommandResult::Ok,
-            Err(error) => CommandResult::Error(error),
+        if self.page == 1 {
+            CommandResult::Error(String::from("Already at first page"))
+        } else {
+            self.page -= 1;
+            CommandResult::Ok
         }
     }
 }

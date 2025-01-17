@@ -1,6 +1,6 @@
 pub mod managers;
 
-mod drawers;
+mod ui;
 mod utils;
 
 use crate::{exit_with_error, Position};

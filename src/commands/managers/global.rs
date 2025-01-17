@@ -1,21 +1,23 @@
-use super::super::drawers::GlobalDrawer;
 use super::super::utils::parse_arg_or_get_from_input;
 use super::super::ChangeEditMode;
 use super::super::CommandResult;
+use crate::commands::ui::render;
+use crate::constants::POISITIONS_PER_PAGE;
 use crate::models::{Action, Order, Position};
 use crate::utils::console::{ask_confirmation, ask_for_input, wait_for_enter, ConfirmationStatus};
+use crate::utils::pagination::get_pages_count;
 use crate::{exit_with_error, storage};
 
 pub struct GlobalCommandManager {
-    drawer: GlobalDrawer,
     positions: Vec<Position>,
+    page: i32,
 }
 
 impl GlobalCommandManager {
     pub fn new(initial_positions: &Vec<Position>) -> GlobalCommandManager {
         GlobalCommandManager {
             positions: initial_positions.to_vec(),
-            drawer: GlobalDrawer::new(&initial_positions),
+            page: 1,
         }
     }
 
@@ -29,15 +31,15 @@ impl GlobalCommandManager {
             "e" => self.handle_edit_position(arg),
             "h" => self.handle_help(),
             _ => {
-                self.drawer.render_positions_table();
+                self.show_ui();
                 CommandResult::CommandNotFound
             }
         }
     }
 
     pub fn show_ui(&self) {
-        self.drawer.render_positions_table();
-        self.drawer.draw_help_tooltip();
+        render::render_positions_table(&self.positions, self.page);
+        render::render_help_tooltip();
     }
 
     fn handle_add_position(&mut self) -> CommandResult {
@@ -83,8 +85,6 @@ impl GlobalCommandManager {
         self.positions
             .push(Position::new(id, name, vec![first_order]));
 
-        self.drawer.positions = self.positions.to_vec();
-
         if let Err(error) = storage::save_positions(&self.positions) {
             exit_with_error(error);
         }
@@ -93,16 +93,21 @@ impl GlobalCommandManager {
     }
 
     fn handle_next_page(&mut self) -> CommandResult {
-        match self.drawer.next_page() {
-            Ok(()) => CommandResult::Ok,
-            Err(error) => CommandResult::Error(error),
+        let max_page = get_pages_count(self.positions.len(), POISITIONS_PER_PAGE);
+        if (self.page + 1) as f64 > max_page {
+            CommandResult::Error(String::from("Already at last page"))
+        } else {
+            self.page += 1;
+            CommandResult::Ok
         }
     }
 
     fn handle_previous_page(&mut self) -> CommandResult {
-        match self.drawer.previous_page() {
-            Ok(()) => CommandResult::Ok,
-            Err(error) => CommandResult::Error(error),
+        if self.page == 1 {
+            CommandResult::Error(String::from("Already at first page"))
+        } else {
+            self.page -= 1;
+            CommandResult::Ok
         }
     }
 
@@ -112,9 +117,12 @@ impl GlobalCommandManager {
             Err(error) => return CommandResult::Error(error),
         };
 
-        if let Err(error) = self.drawer.draw_single_position(id) {
-            return CommandResult::Error(error);
-        }
+        let position = match self.positions.iter().find(|pos| pos.id == id) {
+            Some(pos) => pos,
+            None => return CommandResult::Error(format!("Position with id {} not found", id)),
+        };
+
+        render::render_single_position(position);
 
         let confirmation = match ask_confirmation(
             format!("Are you sure want to delete position {}? (y,N)", id).as_str(),
@@ -160,7 +168,7 @@ impl GlobalCommandManager {
     }
 
     fn handle_help(&self) -> CommandResult {
-        self.drawer.draw_help_page();
+        render::render_global_help_page();
         if let Err(error) = wait_for_enter() {
             return CommandResult::Error(error);
         }
@@ -170,7 +178,6 @@ impl GlobalCommandManager {
 
     fn update_positions(&mut self, positions: &Vec<Position>) -> Result<(), String> {
         self.positions = positions.to_vec();
-        self.drawer.positions = positions.to_vec();
         storage::save_positions(&positions)
     }
 }
