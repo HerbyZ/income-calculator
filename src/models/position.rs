@@ -61,7 +61,7 @@ impl Position {
 
         new_orders.iter().for_each(|order| {
             if self.action != order.action {
-                new_income += (order.price - self.avg_price) * order.amount;
+                new_income += order.income;
             }
         });
 
