@@ -1,5 +1,5 @@
 use colored::Colorize;
-use prettytable::{row, Table};
+use prettytable::{cell, color, row, Attr, Cell, Row, Table};
 
 use crate::constants::{ORDERS_PER_PAGE, POISITIONS_PER_PAGE};
 use crate::models::{Action, Order, Position};
@@ -25,26 +25,26 @@ pub fn render_positions_table(positions: &Vec<Position>, page: i32) {
     let positions_to_draw = select_items_for_page(reversed_positions, page, POISITIONS_PER_PAGE);
 
     positions_to_draw.iter().for_each(|position| {
-        table.add_row(row![
-            position.id,
-            position.name,
-            round(position.amount).unwrap(),
-            round(position.avg_value).unwrap(),
-            round(position.avg_price).unwrap(),
-            round(position.income).unwrap(),
-        ]);
+        table.add_row(Row::new(vec![
+            cell!(position.id),
+            cell!(position.name),
+            cell!(round(position.amount).unwrap()),
+            cell!(round(position.avg_value).unwrap()),
+            cell!(round(position.avg_price).unwrap()),
+            get_styled_income_sell(round(position.income).unwrap()),
+        ]));
     });
 
     // Add total row
-    let total = calculate_total(positions);
-    table.add_row(row![
-        "Total",
-        "-",
-        "-",
-        round(total.0).unwrap(),
-        "-",
-        round(total.1).unwrap()
-    ]);
+    let (value, income) = calculate_total(positions);
+    table.add_row(Row::new(vec![
+        cell!("Total"),
+        cell!("-"),
+        cell!("-"),
+        cell!(round(value).unwrap()),
+        cell!("-"),
+        get_styled_income_sell(round(income).unwrap()),
+    ]));
 
     table.printstd();
     draw_page_counter(page, get_pages_count(positions.len(), POISITIONS_PER_PAGE));
@@ -110,14 +110,14 @@ pub fn render_single_position(position: &Position) {
         "Income"
     ]);
 
-    table.add_row(row![
-        position.id,
-        position.name,
-        round(position.amount).unwrap(),
-        round(position.avg_value).unwrap(),
-        round(position.avg_price).unwrap(),
-        round(position.income).unwrap(),
-    ]);
+    table.add_row(Row::new(vec![
+        cell!(position.id),
+        cell!(position.name),
+        cell!(round(position.amount).unwrap()),
+        cell!(round(position.avg_value).unwrap()),
+        cell!(round(position.avg_price).unwrap()),
+        get_styled_income_sell(round(position.income).unwrap()),
+    ]));
 
     table.printstd();
 }
@@ -133,14 +133,14 @@ pub fn render_position_info(position: &Position, page: i32) {
         "Income"
     ]);
 
-    position_table.add_row(row![
-        position.id,
-        position.name,
-        round(position.amount).unwrap(),
-        round(position.avg_value).unwrap(),
-        round(position.avg_price).unwrap(),
-        round(position.income).unwrap(),
-    ]);
+    position_table.add_row(Row::new(vec![
+        cell!(position.id),
+        cell!(position.name),
+        cell!(round(position.amount).unwrap()),
+        cell!(round(position.avg_value).unwrap()),
+        cell!(round(position.avg_price).unwrap()),
+        get_styled_income_sell(round(position.income).unwrap()),
+    ]));
 
     let mut orders_table = Table::new();
 
@@ -152,20 +152,20 @@ pub fn render_position_info(position: &Position, page: i32) {
             Action::Short => "Sell",
         };
 
-        let income_value = if position.action == order.action {
-            String::from("-")
+        let income_cell = if position.action == order.action {
+            cell!(String::from("-"))
         } else {
-            round(order.income).unwrap().to_string()
+            get_styled_income_sell(round(order.income).unwrap())
         };
 
-        orders_table.add_row(row![
-            order.id,
-            order_type,
-            round(order.amount).unwrap(),
-            round(order.value).unwrap(),
-            round(order.price).unwrap(),
-            income_value
-        ]);
+        orders_table.add_row(Row::new(vec![
+            cell!(order.id),
+            cell!(order_type),
+            cell!(round(order.amount).unwrap()),
+            cell!(round(order.value).unwrap()),
+            cell!(round(order.price).unwrap()),
+            income_cell,
+        ]));
     });
 
     clear_screen().expect("clear screen");
@@ -194,27 +194,23 @@ pub fn render_single_order(position: &Position, order: &Order) {
         Action::Short => "Sell",
     };
 
-    let income_value = if position.action == order.action {
-        String::from("-")
+    let income_cell = if position.action == order.action {
+        cell!(String::from("-"))
     } else {
-        if order.income > 0f64 {
-            format!("+{}", round(order.income).unwrap())
-        } else {
-            round(order.income).unwrap().to_string()
-        }
+        get_styled_income_sell(round(order.income).unwrap())
     };
 
     let mut table = Table::new();
     table.add_row(row!["Id", "Type", "Amount", "Value", "Price", "Income"]);
 
-    table.add_row(row![
-        order.id,
-        order_type,
-        round(order.amount).unwrap(),
-        round(order.value).unwrap(),
-        round(order.price).unwrap(),
-        income_value
-    ]);
+    table.add_row(Row::new(vec![
+        cell!(order.id),
+        cell!(order_type),
+        cell!(round(order.amount).unwrap()),
+        cell!(round(order.value).unwrap()),
+        cell!(round(order.price).unwrap()),
+        income_cell,
+    ]));
 
     table.printstd();
 }
@@ -229,4 +225,14 @@ fn calculate_total(positions: &Vec<Position>) -> (f64, f64) {
     }
 
     (value, income)
+}
+
+fn get_styled_income_sell(income: f64) -> Cell {
+    match income.total_cmp(&0f64) {
+        std::cmp::Ordering::Equal => cell!(income),
+        std::cmp::Ordering::Greater => {
+            cell!(format!("+{}", income)).with_style(Attr::ForegroundColor(color::GREEN))
+        }
+        std::cmp::Ordering::Less => cell!(income).with_style(Attr::ForegroundColor(color::RED)),
+    }
 }
