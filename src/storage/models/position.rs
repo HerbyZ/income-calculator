@@ -1,3 +1,4 @@
+use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 
 use crate::models::{Order, Position};
@@ -10,6 +11,9 @@ pub struct PositionStorageModel {
     pub action: ActionStorageModel,
     pub name: String,
     pub orders: Vec<OrderStorageModel>,
+
+    #[serde(default = "Utc::now")]
+    pub edited_at: DateTime<Utc>,
 }
 
 impl ToModel<Position> for PositionStorageModel {
@@ -39,6 +43,7 @@ impl ToModel<Position> for PositionStorageModel {
         };
 
         let mut pos = Position::new(self.id, self.name.clone(), vec![first_order]);
+        pos.edited_at = self.edited_at;
 
         orders.remove(0);
         for order_models in orders {
@@ -68,6 +73,7 @@ impl FromModel<Position> for PositionStorageModel {
 
         PositionStorageModel {
             id: model.id,
+            edited_at: model.edited_at,
             action: ActionStorageModel::from_model(model.action),
             name: model.name,
             orders: order_models,

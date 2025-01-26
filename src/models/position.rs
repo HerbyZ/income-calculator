@@ -1,8 +1,11 @@
+use chrono::{DateTime, Utc};
+
 use super::{Action, Order};
 
 #[derive(Debug, Clone)]
 pub struct Position {
     pub id: i32,
+    pub edited_at: DateTime<Utc>,
     pub action: Action,
     pub name: String,
     pub amount: f64,
@@ -19,6 +22,7 @@ impl Position {
 
         let mut pos = Position {
             id,
+            edited_at: Utc::now(),
             name,
             action: first_order.action,
             amount: 0f64,

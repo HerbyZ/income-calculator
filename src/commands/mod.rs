@@ -3,8 +3,10 @@ pub mod managers;
 mod ui;
 mod utils;
 
-use crate::{exit_with_error, Position};
+use chrono::Utc;
 use managers::{GlobalCommandManager, PositionCommandManager};
+
+use crate::{exit_with_error, Position};
 
 pub enum ChangeEditMode {
     EditPosition(Position),
@@ -117,7 +119,10 @@ impl CommandHandler {
                     .position(|pos| pos.id == position.id)
                     .expect("get index of changed position");
 
-                self.positions[index] = position.clone();
+                let mut pos = position.clone();
+                pos.edited_at = Utc::now();
+
+                self.positions[index] = pos;
                 self.global_handler = GlobalCommandManager::new(&self.positions);
                 self.edit_mode = EditMode::Global;
             }
