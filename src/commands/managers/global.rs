@@ -1,4 +1,4 @@
-use super::super::utils::parse_arg_or_get_from_input;
+use super::super::utils::commands::parse_arg_or_get_from_input;
 use super::super::ChangeEditMode;
 use super::super::CommandResult;
 use crate::commands::ui::render;
