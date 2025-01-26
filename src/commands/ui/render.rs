@@ -72,8 +72,9 @@ pub fn render_global_help_page() {
         "[id]".bold(),
         "Delete position"
     );
+    println!("{} - {}", "cs".bold().yellow(), "Change sorting");
     println!("{} - {}", "n".bold().yellow(), "Show next page");
-    println!("{} - {}", "n".bold().yellow(), "Show previous page");
+    println!("{} - {}", "p".bold().yellow(), "Show previous page");
     println!();
 }
 

@@ -1,15 +1,21 @@
+use colored::Colorize;
+
 use super::super::utils::commands::parse_arg_or_get_from_input;
+use super::super::utils::sorting::{get_sorted_positions, SortBy, SortDirection};
 use super::super::ChangeEditMode;
 use super::super::CommandResult;
 use crate::commands::ui::render;
 use crate::constants::POISITIONS_PER_PAGE;
 use crate::models::{Action, Order, Position};
-use crate::utils::console::{ask_confirmation, ask_for_input, wait_for_enter, ConfirmationStatus};
+use crate::utils::console::{
+    ask_confirmation, ask_for_input, clear_screen, wait_for_enter, ConfirmationStatus,
+};
 use crate::utils::pagination::get_pages_count;
 use crate::{exit_with_error, storage};
 
 pub struct GlobalCommandManager {
     positions: Vec<Position>,
+    sort_by: SortBy,
     page: i32,
 }
 
@@ -17,6 +23,7 @@ impl GlobalCommandManager {
     pub fn new(initial_positions: &Vec<Position>) -> GlobalCommandManager {
         GlobalCommandManager {
             positions: initial_positions.to_vec(),
+            sort_by: SortBy::LastChange(SortDirection::Descending),
             page: 1,
         }
     }
@@ -29,6 +36,7 @@ impl GlobalCommandManager {
             "a" => self.handle_add_position(),
             "d" => self.handle_delete_position(arg),
             "e" => self.handle_edit_position(arg),
+            "cs" => self.handle_change_sorting(),
             "h" => self.handle_help(),
             _ => {
                 self.show_ui();
@@ -38,7 +46,8 @@ impl GlobalCommandManager {
     }
 
     pub fn show_ui(&self) {
-        render::render_positions_table(&self.positions, self.page);
+        let sorted_positions = get_sorted_positions(&self.positions, &self.sort_by);
+        render::render_positions_table(&sorted_positions, self.page);
         render::render_help_tooltip();
     }
 
@@ -179,5 +188,54 @@ impl GlobalCommandManager {
     fn update_positions(&mut self, positions: &Vec<Position>) -> Result<(), String> {
         self.positions = positions.to_vec();
         storage::save_positions(&positions)
+    }
+
+    fn handle_change_sorting(&mut self) -> CommandResult {
+        clear_screen().expect("clear screen");
+
+        println!("{}", "Awailable sorting methods: ".bold());
+        println!("{}{}", "1".yellow(), ". By avg value");
+        println!("{}{}", "2".yellow(), ". By avg price");
+        println!("{}{}", "3".yellow(), ". By income");
+        println!("{}{}", "4".yellow(), ". By last change");
+
+        println!("{}{}", "q".yellow(), " - Exit");
+
+        let choice = match ask_for_input::<String>("\nChoose the number of preffered sorting:") {
+            Ok(answer) => answer.to_lowercase(),
+            Err(error) => return CommandResult::Error(error),
+        };
+
+        if choice.trim() == "q" {
+            return CommandResult::Ok;
+        }
+
+        let direction_str = match ask_for_input::<String>("Choose direction (asc, desc): ") {
+            Ok(answer) => answer.to_lowercase(),
+            Err(error) => return CommandResult::Error(error),
+        };
+
+        let direction = match direction_str.trim() {
+            "asc" | "a" => SortDirection::Ascending,
+            "desc" | "d" => SortDirection::Descending,
+            _ => {
+                return CommandResult::Error(format!(
+                    "Failed to parse direction '{}'",
+                    direction_str
+                ))
+            }
+        };
+
+        self.sort_by = match choice.trim() {
+            "1" => SortBy::AvgValue(direction),
+            "2" => SortBy::AvgPrice(direction),
+            "3" => SortBy::Income(direction),
+            "4" => SortBy::LastChange(direction),
+            _ => {
+                return CommandResult::Error(format!("Failed to parse sorting method '{}'", choice))
+            }
+        };
+
+        CommandResult::Ok
     }
 }
