@@ -8,6 +8,7 @@ pub enum SortDirection {
 
 #[derive(Debug, Clone, Copy)]
 pub enum SortBy {
+    Id(SortDirection),
     AvgValue(SortDirection),
     LastChange(SortDirection),
     AvgPrice(SortDirection),
@@ -17,8 +18,11 @@ pub enum SortBy {
 pub fn get_sorted_positions(positions: &Vec<Position>, sort_by: &SortBy) -> Vec<Position> {
     let mut positions = positions.clone();
 
-    // Sorry for this
     match sort_by {
+        SortBy::Id(direction) => positions.sort_by(|first, second| match direction {
+            SortDirection::Descending => first.id.cmp(&second.id),
+            SortDirection::Ascending => second.id.cmp(&first.id),
+        }),
         SortBy::AvgValue(direction) => positions.sort_by(|first, second| match direction {
             SortDirection::Descending => first.avg_value.total_cmp(&second.avg_price),
             SortDirection::Ascending => second.avg_value.total_cmp(&first.avg_value),

@@ -29,6 +29,7 @@ impl FromModel<SortDirection> for SortDirectionStorageModel {
 
 #[derive(Debug, Serialize, Deserialize)]
 pub enum SortByStorageModel {
+    Id(SortDirectionStorageModel),
     AvgValue(SortDirectionStorageModel),
     LastChange(SortDirectionStorageModel),
     AvgPrice(SortDirectionStorageModel),
@@ -44,6 +45,7 @@ impl Default for SortByStorageModel {
 impl ToModel<SortBy> for SortByStorageModel {
     fn to_model(&self) -> Result<SortBy, String> {
         match self {
+            Self::Id(direction) => Ok(SortBy::Id(direction.to_model().unwrap())),
             Self::AvgPrice(direction) => Ok(SortBy::AvgPrice(direction.to_model().unwrap())),
             Self::AvgValue(direction) => Ok(SortBy::AvgValue(direction.to_model().unwrap())),
             Self::Income(direction) => Ok(SortBy::Income(direction.to_model().unwrap())),
@@ -67,6 +69,7 @@ impl FromModel<SortBy> for SortByStorageModel {
             SortBy::LastChange(direction) => {
                 Self::LastChange(SortDirectionStorageModel::from_model(direction))
             }
+            SortBy::Id(direction) => Self::Id(SortDirectionStorageModel::from_model(direction)),
         }
     }
 }

@@ -196,10 +196,11 @@ impl GlobalCommandManager {
         clear_screen().expect("clear screen");
 
         println!("{}", "Awailable sorting methods: ".bold());
-        println!("{}{}", "1".yellow(), ". By avg value");
-        println!("{}{}", "2".yellow(), ". By avg price");
-        println!("{}{}", "3".yellow(), ". By income");
-        println!("{}{}", "4".yellow(), ". By last change");
+        println!("{}{}", "1".yellow(), ". By id");
+        println!("{}{}", "2".yellow(), ". By avg value");
+        println!("{}{}", "3".yellow(), ". By avg price");
+        println!("{}{}", "4".yellow(), ". By income");
+        println!("{}{}", "5".yellow(), ". By last change");
 
         println!("{}{}", "q".yellow(), " - Exit");
 
@@ -229,10 +230,11 @@ impl GlobalCommandManager {
         };
 
         self.sort_by = match choice.trim() {
-            "1" => SortBy::AvgValue(direction),
-            "2" => SortBy::AvgPrice(direction),
-            "3" => SortBy::Income(direction),
-            "4" => SortBy::LastChange(direction),
+            "1" => SortBy::Id(direction),
+            "2" => SortBy::AvgValue(direction),
+            "3" => SortBy::AvgPrice(direction),
+            "4" => SortBy::Income(direction),
+            "5" => SortBy::LastChange(direction),
             _ => {
                 return CommandResult::Error(format!("Failed to parse sorting method '{}'", choice))
             }
