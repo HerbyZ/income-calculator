@@ -8,7 +8,7 @@ where
     let splitted_items = items.split_off(split_index);
 
     let mut result: Vec<T> = vec![];
-    for i in 0..items_per_page - 1 {
+    for i in 0..items_per_page {
         let index: usize = i.try_into().unwrap();
 
         if let Some(item) = splitted_items.get(index) {

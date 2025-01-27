@@ -1,12 +1,12 @@
-pub mod global;
-pub mod position;
+pub mod managers;
+pub mod utils;
 
-mod drawers;
-mod utils;
+mod ui;
+
+use chrono::Utc;
+use managers::{GlobalCommandManager, PositionCommandManager};
 
 use crate::{exit_with_error, Position};
-use global::GlobalCommandManager;
-use position::PositionCommandManager;
 
 pub enum ChangeEditMode {
     EditPosition(Position),
@@ -36,11 +36,11 @@ pub struct CommandHandler {
 const DEFAULT_EDIT_MODE: EditMode = EditMode::Global;
 
 impl CommandHandler {
-    pub fn new(initial_positions: Vec<Position>) -> CommandHandler {
+    pub fn new(initial_positions: &Vec<Position>) -> CommandHandler {
         CommandHandler {
-            global_handler: GlobalCommandManager::new(initial_positions.clone()),
+            global_handler: GlobalCommandManager::new(initial_positions),
             position_handler: None,
-            positions: initial_positions,
+            positions: initial_positions.to_vec(),
             edit_mode: DEFAULT_EDIT_MODE,
         }
     }
@@ -109,7 +109,7 @@ impl CommandHandler {
     fn change_edit_mode(&mut self, mode: ChangeEditMode) {
         match mode {
             ChangeEditMode::EditPosition(pos) => {
-                self.position_handler = Some(PositionCommandManager::new(pos.clone()));
+                self.position_handler = Some(PositionCommandManager::new(&pos));
                 self.edit_mode = EditMode::Position(pos);
             }
             ChangeEditMode::PositionChanged(position) => {
@@ -119,8 +119,11 @@ impl CommandHandler {
                     .position(|pos| pos.id == position.id)
                     .expect("get index of changed position");
 
-                self.positions[index] = position.clone();
-                self.global_handler = GlobalCommandManager::new(self.positions.clone());
+                let mut pos = position.clone();
+                pos.edited_at = Utc::now();
+
+                self.positions[index] = pos;
+                self.global_handler = GlobalCommandManager::new(&self.positions);
                 self.edit_mode = EditMode::Global;
             }
         };
