@@ -1,10 +1,12 @@
 use crate::models::Position;
 
+#[derive(Debug, Clone, Copy)]
 pub enum SortDirection {
     Descending,
     Ascending,
 }
 
+#[derive(Debug, Clone, Copy)]
 pub enum SortBy {
     AvgValue(SortDirection),
     LastChange(SortDirection),

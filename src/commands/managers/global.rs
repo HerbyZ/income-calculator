@@ -7,6 +7,7 @@ use super::super::CommandResult;
 use crate::commands::ui::render;
 use crate::constants::POISITIONS_PER_PAGE;
 use crate::models::{Action, Order, Position};
+use crate::storage::{load_storage, update_storage};
 use crate::utils::console::{
     ask_confirmation, ask_for_input, clear_screen, wait_for_enter, ConfirmationStatus,
 };
@@ -21,9 +22,10 @@ pub struct GlobalCommandManager {
 
 impl GlobalCommandManager {
     pub fn new(initial_positions: &Vec<Position>) -> GlobalCommandManager {
+        let storage = load_storage().expect("load storage");
         GlobalCommandManager {
             positions: initial_positions.to_vec(),
-            sort_by: SortBy::LastChange(SortDirection::Descending),
+            sort_by: storage.sort_positions_by,
             page: 1,
         }
     }
@@ -235,6 +237,10 @@ impl GlobalCommandManager {
                 return CommandResult::Error(format!("Failed to parse sorting method '{}'", choice))
             }
         };
+
+        if let Err(error) = update_storage(|storage| storage.sort_positions_by = self.sort_by) {
+            return CommandResult::Error(error);
+        }
 
         CommandResult::Ok
     }

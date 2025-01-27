@@ -1,7 +1,7 @@
 pub mod managers;
+pub mod utils;
 
 mod ui;
-mod utils;
 
 use chrono::Utc;
 use managers::{GlobalCommandManager, PositionCommandManager};
