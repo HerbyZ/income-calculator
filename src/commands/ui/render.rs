@@ -16,7 +16,8 @@ pub fn render_positions_table(positions: &Vec<Position>, page: i32) {
         "Amount",
         "Avg value",
         "Avg price",
-        "Income"
+        "Income",
+        "Status"
     ]);
 
     let mut reversed_positions = positions.to_vec();
@@ -32,6 +33,7 @@ pub fn render_positions_table(positions: &Vec<Position>, page: i32) {
             cell!(round(position.avg_value).unwrap()),
             cell!(round(position.avg_price).unwrap()),
             get_styled_income_sell(round(position.income).unwrap()),
+            get_status_cell(position),
         ]));
     });
 
@@ -44,6 +46,7 @@ pub fn render_positions_table(positions: &Vec<Position>, page: i32) {
         cell!(round(value).unwrap()),
         cell!("-"),
         get_styled_income_sell(round(income).unwrap()),
+        cell!("-"),
     ]));
 
     table.printstd();
@@ -235,5 +238,13 @@ fn get_styled_income_sell(income: f64) -> Cell {
             cell!(format!("+{}", income)).with_style(Attr::ForegroundColor(color::GREEN))
         }
         std::cmp::Ordering::Less => cell!(income).with_style(Attr::ForegroundColor(color::RED)),
+    }
+}
+
+fn get_status_cell(position: &Position) -> Cell {
+    if position.amount == 0f64 {
+        cell!("Closed").with_style(Attr::ForegroundColor(color::BRIGHT_BLACK))
+    } else {
+        cell!("Active")
     }
 }
