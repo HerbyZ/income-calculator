@@ -6,6 +6,15 @@ pub enum SortDirection {
     Ascending,
 }
 
+impl ToString for SortDirection {
+    fn to_string(&self) -> String {
+        match self {
+            Self::Ascending => String::from("Asc"),
+            Self::Descending => String::from("Desc"),
+        }
+    }
+}
+
 #[derive(Debug, Clone, Copy)]
 pub enum SortBy {
     Id(SortDirection),
@@ -13,6 +22,18 @@ pub enum SortBy {
     LastChange(SortDirection),
     AvgPrice(SortDirection),
     Income(SortDirection),
+}
+
+impl ToString for SortBy {
+    fn to_string(&self) -> String {
+        match self {
+            Self::Id(direction) => format!("Id ({})", direction.to_string()),
+            Self::AvgValue(direction) => format!("Avg value ({})", direction.to_string()),
+            Self::LastChange(direction) => format!("Last change ({})", direction.to_string()),
+            Self::AvgPrice(direction) => format!("Avg price ({})", direction.to_string()),
+            Self::Income(direction) => format!("Income ({})", direction.to_string()),
+        }
+    }
 }
 
 pub fn get_sorted_positions(positions: &Vec<Position>, sort_by: &SortBy) -> Vec<Position> {

@@ -195,6 +195,11 @@ impl GlobalCommandManager {
     fn handle_change_sorting(&mut self) -> CommandResult {
         clear_screen().expect("clear screen");
 
+        println!(
+            "Current sorting method: {}",
+            self.sort_by.to_string().yellow()
+        );
+        println!();
         println!("{}", "Awailable sorting methods: ".bold());
         println!("{}{}", "1".yellow(), ". By id");
         println!("{}{}", "2".yellow(), ". By avg value");
