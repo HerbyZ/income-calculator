@@ -28,7 +28,7 @@ impl GlobalCommandManager {
             positions: initial_positions.to_vec(),
             sorter: PositionsSorter {
                 sort_by: storage.sort_positions_by,
-                move_closed_to_bottom: false, // TODO: Load from storage
+                move_closed_to_bottom: storage.move_closed_positions_to_bottom,
             },
             page: 1,
         }
@@ -237,6 +237,13 @@ impl GlobalCommandManager {
 
         if choice.trim() == "cb" {
             self.sorter.move_closed_to_bottom = !self.sorter.move_closed_to_bottom;
+
+            if let Err(error) = update_storage(|storage| {
+                storage.move_closed_positions_to_bottom = self.sorter.move_closed_to_bottom
+            }) {
+                return CommandResult::Error(error);
+            }
+
             return CommandResult::Ok;
         }
 

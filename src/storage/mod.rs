@@ -13,6 +13,7 @@ use crate::models::Position;
 
 pub struct Storage {
     pub sort_positions_by: SortBy,
+    pub move_closed_positions_to_bottom: bool,
     pub positions: Vec<Position>,
 }
 

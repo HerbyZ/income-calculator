@@ -9,7 +9,16 @@ pub struct StorageModel {
     #[serde(default)]
     pub sort_positions_by: SortByStorageModel,
 
+    #[serde(default = "default::move_closed_to_bottom")]
+    pub move_closed_to_bottom: bool,
+
     positions: Vec<PositionStorageModel>,
+}
+
+mod default {
+    pub fn move_closed_to_bottom() -> bool {
+        false
+    }
 }
 
 impl FromModel<Storage> for StorageModel {
@@ -22,6 +31,7 @@ impl FromModel<Storage> for StorageModel {
         Self {
             positions: position_models,
             sort_positions_by: SortByStorageModel::from_model(model.sort_positions_by),
+            move_closed_to_bottom: model.move_closed_positions_to_bottom,
         }
     }
 }
@@ -42,6 +52,7 @@ impl ToModel<Storage> for StorageModel {
                 Ok(value) => value,
                 Err(error) => return Err(error),
             },
+            move_closed_positions_to_bottom: self.move_closed_to_bottom,
         })
     }
 }
