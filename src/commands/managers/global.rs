@@ -1,10 +1,11 @@
 use colored::Colorize;
 
 use super::super::utils::commands::parse_arg_or_get_from_input;
-use super::super::utils::sorting::{get_sorted_positions, SortBy, SortDirection};
+use super::super::utils::sorting::{SortBy, SortDirection};
 use super::super::ChangeEditMode;
 use super::super::CommandResult;
 use crate::commands::ui::render;
+use crate::commands::utils::sorting::PositionsSorter;
 use crate::constants::POISITIONS_PER_PAGE;
 use crate::models::{Action, Order, Position};
 use crate::storage::{load_storage, update_storage};
@@ -16,7 +17,7 @@ use crate::{exit_with_error, storage};
 
 pub struct GlobalCommandManager {
     positions: Vec<Position>,
-    sort_by: SortBy,
+    sorter: PositionsSorter,
     page: i32,
 }
 
@@ -25,7 +26,10 @@ impl GlobalCommandManager {
         let storage = load_storage().expect("load storage");
         GlobalCommandManager {
             positions: initial_positions.to_vec(),
-            sort_by: storage.sort_positions_by,
+            sorter: PositionsSorter {
+                sort_by: storage.sort_positions_by,
+                move_closed_to_bottom: false, // TODO: Load from storage
+            },
             page: 1,
         }
     }
@@ -48,7 +52,7 @@ impl GlobalCommandManager {
     }
 
     pub fn show_ui(&self) {
-        let sorted_positions = get_sorted_positions(&self.positions, &self.sort_by);
+        let sorted_positions = self.sorter.sort(&self.positions);
         render::render_positions_table(&sorted_positions, self.page);
         render::render_help_tooltip();
     }
@@ -197,9 +201,11 @@ impl GlobalCommandManager {
 
         println!(
             "Current sorting method: {}",
-            self.sort_by.to_string().yellow()
+            self.sorter.sort_by.to_string().yellow()
         );
+
         println!();
+
         println!("{}", "Awailable sorting methods: ".bold());
         println!("{}{}", "1".yellow(), ". By id");
         println!("{}{}", "2".yellow(), ". By avg value");
@@ -207,6 +213,17 @@ impl GlobalCommandManager {
         println!("{}{}", "4".yellow(), ". By income");
         println!("{}{}", "5".yellow(), ". By last change");
 
+        println!();
+
+        println!(
+            "{}{} ({})",
+            "t".yellow(),
+            " - Move closed positions to bottom",
+            match self.sorter.move_closed_to_bottom {
+                true => "enabled",
+                false => "disabled",
+            }
+        );
         println!("{}{}", "q".yellow(), " - Exit");
 
         let choice = match ask_for_input::<String>("\nChoose the number of preffered sorting:") {
@@ -215,6 +232,11 @@ impl GlobalCommandManager {
         };
 
         if choice.trim() == "q" {
+            return CommandResult::Ok;
+        }
+
+        if choice.trim() == "cb" {
+            self.sorter.move_closed_to_bottom = !self.sorter.move_closed_to_bottom;
             return CommandResult::Ok;
         }
 
@@ -234,7 +256,7 @@ impl GlobalCommandManager {
             }
         };
 
-        self.sort_by = match choice.trim() {
+        self.sorter.sort_by = match choice.trim() {
             "1" => SortBy::Id(direction),
             "2" => SortBy::AvgValue(direction),
             "3" => SortBy::AvgPrice(direction),
@@ -245,7 +267,9 @@ impl GlobalCommandManager {
             }
         };
 
-        if let Err(error) = update_storage(|storage| storage.sort_positions_by = self.sort_by) {
+        if let Err(error) =
+            update_storage(|storage| storage.sort_positions_by = self.sorter.sort_by)
+        {
             return CommandResult::Error(error);
         }
 
