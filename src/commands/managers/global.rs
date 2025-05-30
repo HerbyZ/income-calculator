@@ -217,7 +217,7 @@ impl GlobalCommandManager {
 
         println!(
             "{}{} ({})",
-            "t".yellow(),
+            "cb".yellow(),
             " - Move closed positions to bottom",
             match self.sorter.move_closed_to_bottom {
                 true => "enabled",
