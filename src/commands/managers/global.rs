@@ -6,7 +6,7 @@ use super::super::ChangeEditMode;
 use super::super::CommandResult;
 use crate::commands::ui::render;
 use crate::commands::utils::sorting::PositionsSorter;
-use crate::constants::POISITIONS_PER_PAGE;
+use crate::constants::POSITIONS_PER_PAGE;
 use crate::models::{Action, Order, Position};
 use crate::storage::{load_storage, update_storage};
 use crate::utils::console::{
@@ -108,7 +108,7 @@ impl GlobalCommandManager {
     }
 
     fn handle_next_page(&mut self) -> CommandResult {
-        let max_page = get_pages_count(self.positions.len(), POISITIONS_PER_PAGE);
+        let max_page = get_pages_count(self.positions.len(), POSITIONS_PER_PAGE);
         if (self.page + 1) as f64 > max_page {
             CommandResult::Error(String::from("Already at last page"))
         } else {
@@ -206,7 +206,7 @@ impl GlobalCommandManager {
 
         println!();
 
-        println!("{}", "Awailable sorting methods: ".bold());
+        println!("{}", "Available sorting methods: ".bold());
         println!("{}{}", "1".yellow(), ". By id");
         println!("{}{}", "2".yellow(), ". By avg value");
         println!("{}{}", "3".yellow(), ". By avg price");
@@ -226,7 +226,7 @@ impl GlobalCommandManager {
         );
         println!("{}{}", "q".yellow(), " - Exit");
 
-        let choice = match ask_for_input::<String>("\nChoose the number of preffered sorting:") {
+        let choice = match ask_for_input::<String>("\nChoose the number of preferred sorting:") {
             Ok(answer) => answer.to_lowercase(),
             Err(error) => return CommandResult::Error(error),
         };

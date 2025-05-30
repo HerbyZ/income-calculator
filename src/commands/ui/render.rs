@@ -1,7 +1,7 @@
 use colored::Colorize;
 use prettytable::{cell, color, row, Attr, Cell, Row, Table};
 
-use crate::constants::{ORDERS_PER_PAGE, POISITIONS_PER_PAGE};
+use crate::constants::{ORDERS_PER_PAGE, POSITIONS_PER_PAGE};
 use crate::models::{Action, Order, Position};
 use crate::utils::console::clear_screen;
 use crate::utils::math::round;
@@ -23,7 +23,7 @@ pub fn render_positions_table(positions: &Vec<Position>, page: i32) {
     let mut reversed_positions = positions.to_vec();
     reversed_positions.reverse();
 
-    let positions_to_draw = select_items_for_page(reversed_positions, page, POISITIONS_PER_PAGE);
+    let positions_to_draw = select_items_for_page(reversed_positions, page, POSITIONS_PER_PAGE);
 
     positions_to_draw.iter().for_each(|position| {
         table.add_row(Row::new(vec![
@@ -50,7 +50,7 @@ pub fn render_positions_table(positions: &Vec<Position>, page: i32) {
     ]));
 
     table.printstd();
-    draw_page_counter(page, get_pages_count(positions.len(), POISITIONS_PER_PAGE));
+    draw_page_counter(page, get_pages_count(positions.len(), POSITIONS_PER_PAGE));
 }
 
 pub fn render_help_tooltip() {

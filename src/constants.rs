@@ -1,5 +1,5 @@
 // Amount of positions rendered per one page
-pub const POISITIONS_PER_PAGE: i32 = 10;
+pub const POSITIONS_PER_PAGE: i32 = 10;
 
 // Amount of orders rendered per one page
 pub const ORDERS_PER_PAGE: i32 = 10;
