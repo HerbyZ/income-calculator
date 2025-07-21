@@ -53,8 +53,16 @@ impl PositionCommandManager {
             Err(error) => return CommandResult::Error(error),
         };
 
-        let amount = match ask_for_input::<f64>("Enter position amount") {
-            Ok(value) => value,
+        let amount = match ask_for_input::<f64>(
+            "Enter position amount.\nEnter 0 if you're fully closing position.",
+        ) {
+            Ok(value) => {
+                if value == 0f64 {
+                    self.position.amount
+                } else {
+                    value
+                }
+            }
             Err(error) => return CommandResult::Error(error),
         };
 
