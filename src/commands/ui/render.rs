@@ -1,8 +1,8 @@
 use colored::Colorize;
 use prettytable::{cell, color, row, Attr, Cell, Row, Table};
 
-use crate::constants::{ORDERS_PER_PAGE, POSITIONS_PER_PAGE};
 use crate::models::{Action, Order, Position};
+use crate::options::get_options;
 use crate::utils::console::clear_screen;
 use crate::utils::math::round;
 use crate::utils::pagination::{draw_page_counter, get_pages_count, select_items_for_page};
@@ -23,7 +23,8 @@ pub fn render_positions_table(positions: &Vec<Position>, page: i32) {
     let mut reversed_positions = positions.to_vec();
     reversed_positions.reverse();
 
-    let positions_to_draw = select_items_for_page(reversed_positions, page, POSITIONS_PER_PAGE);
+    let positions_per_page = get_options().positions_per_page;
+    let positions_to_draw = select_items_for_page(reversed_positions, page, positions_per_page);
 
     positions_to_draw.iter().for_each(|position| {
         table.add_row(Row::new(vec![
@@ -50,7 +51,9 @@ pub fn render_positions_table(positions: &Vec<Position>, page: i32) {
     ]));
 
     table.printstd();
-    draw_page_counter(page, get_pages_count(positions.len(), POSITIONS_PER_PAGE));
+
+    let positions_per_page = get_options().positions_per_page;
+    draw_page_counter(page, get_pages_count(positions.len(), positions_per_page));
 }
 
 pub fn render_help_tooltip() {
@@ -186,9 +189,11 @@ pub fn render_position_info(position: &Position, page: i32) {
 
     println!("Position {} orders:", position.id.to_string().bold());
     orders_table.printstd();
+
+    let orders_per_page = get_options().orders_per_page;
     draw_page_counter(
         page,
-        get_pages_count(position.orders.len(), ORDERS_PER_PAGE),
+        get_pages_count(position.orders.len(), orders_per_page),
     );
 }
 

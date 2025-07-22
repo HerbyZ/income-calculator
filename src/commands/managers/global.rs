@@ -6,8 +6,8 @@ use super::super::ChangeEditMode;
 use super::super::CommandResult;
 use crate::commands::ui::render;
 use crate::commands::utils::sorting::PositionsSorter;
-use crate::constants::POSITIONS_PER_PAGE;
 use crate::models::{Action, Order, Position};
+use crate::options::get_options;
 use crate::storage::{load_storage, update_storage};
 use crate::utils::console::{
     ask_confirmation, ask_for_input, clear_screen, wait_for_enter, ConfirmationStatus,
@@ -108,7 +108,8 @@ impl GlobalCommandManager {
     }
 
     fn handle_next_page(&mut self) -> CommandResult {
-        let max_page = get_pages_count(self.positions.len(), POSITIONS_PER_PAGE);
+        let positions_per_page = get_options().positions_per_page;
+        let max_page = get_pages_count(self.positions.len(), positions_per_page);
         if (self.page + 1) as f64 > max_page {
             CommandResult::Error(String::from("Already at last page"))
         } else {

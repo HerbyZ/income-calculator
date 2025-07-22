@@ -1,6 +1,7 @@
 pub mod commands;
 pub mod constants;
 pub mod models;
+pub mod options;
 pub mod storage;
 pub mod utils;
 
@@ -39,6 +40,10 @@ try to fix data in file yourself\ny - Reinitialize storage\nn - Exit without cha
 }
 
 fn main() {
+    if let Err(error) = options::initialize_options() {
+        exit_with_error(error);
+    }
+
     if let Err(error) = storage::initialize_storage() {
         exit_with_error(error);
     }
