@@ -38,6 +38,7 @@ impl ToString for SortBy {
 
 pub struct PositionsSorter {
     pub sort_by: SortBy,
+    pub hide_closed: bool,
     pub move_closed_to_bottom: bool,
 }
 
@@ -68,21 +69,36 @@ impl PositionsSorter {
             }),
         }
 
+        if self.hide_closed {
+            let active_positions = split_positions_by_status(&positions).0;
+            return active_positions;
+        }
+
         if self.move_closed_to_bottom {
-            let mut positions_sorted_by_status = vec![];
-            let mut closed_positions = vec![];
+            let positions = split_positions_by_status(&positions);
+            let mut active_positions = positions.0;
+            let mut closed_positions = positions.1;
 
-            positions
-                .iter()
-                .for_each(|pos| match pos.avg_value == 0f64 {
-                    true => positions_sorted_by_status.push(pos.clone()),
-                    false => closed_positions.push(pos.clone()),
-                });
-
-            positions_sorted_by_status.append(&mut closed_positions);
-            return positions_sorted_by_status;
+            // Append active positions to closed and not vise-versa, cuz rust appends elements
+            // to the start of a vector
+            closed_positions.append(&mut active_positions);
+            return closed_positions;
         }
 
         positions
     }
+}
+
+fn split_positions_by_status(positions: &Vec<Position>) -> (Vec<Position>, Vec<Position>) {
+    let mut active_positions = vec![];
+    let mut closed_positions = vec![];
+
+    positions
+        .iter()
+        .for_each(|pos| match pos.avg_value == 0f64 {
+            false => active_positions.push(pos.clone()),
+            true => closed_positions.push(pos.clone()),
+        });
+
+    (active_positions, closed_positions)
 }

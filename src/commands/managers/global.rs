@@ -24,10 +24,12 @@ pub struct GlobalCommandManager {
 impl GlobalCommandManager {
     pub fn new(initial_positions: &Vec<Position>) -> GlobalCommandManager {
         let storage = load_storage().expect("load storage");
+        let options = get_options();
         GlobalCommandManager {
             positions: initial_positions.to_vec(),
             sorter: PositionsSorter {
                 sort_by: storage.sort_positions_by,
+                hide_closed: options.hide_closed_positions,
                 move_closed_to_bottom: storage.move_closed_positions_to_bottom,
             },
             page: 1,

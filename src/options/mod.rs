@@ -15,6 +15,7 @@ pub fn initialize_options() -> Result<(), String> {
     let default_options_contents = json!(Options {
         positions_per_page: 10,
         orders_per_page: 10,
+        hide_closed_positions: false,
         storage_file_path: String::from("./storage.json"),
     })
     .to_string();
