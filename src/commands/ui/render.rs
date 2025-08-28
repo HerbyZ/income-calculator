@@ -58,7 +58,6 @@ pub fn render_positions_table(positions: &Vec<Position>, page: i32) {
 
     table.printstd();
 
-    let positions_per_page = get_options().positions_per_page;
     draw_page_counter(page, get_pages_count(positions.len(), positions_per_page));
 }
 
@@ -159,7 +158,10 @@ pub fn render_position_info(position: &Position, page: i32) {
 
     orders_table.add_row(row!["Id", "Type", "Amount", "Value", "Price", "Income"]);
 
-    position.orders.iter().for_each(|order| {
+    let orders_per_page = get_options().orders_per_page;
+    let orders_to_draw = select_items_for_page(position.orders.clone(), page, orders_per_page);
+
+    orders_to_draw.iter().for_each(|order| {
         let order_type = match order.action {
             Action::Long => "Buy",
             Action::Short => "Sell",
@@ -210,7 +212,6 @@ pub fn render_position_info(position: &Position, page: i32) {
     println!("Position {} orders:", position.id.to_string().bold());
     orders_table.printstd();
 
-    let orders_per_page = get_options().orders_per_page;
     draw_page_counter(
         page,
         get_pages_count(position.orders.len(), orders_per_page),
