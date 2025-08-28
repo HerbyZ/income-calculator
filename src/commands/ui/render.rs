@@ -188,7 +188,21 @@ pub fn render_position_info(position: &Position, page: i32) {
         Action::Long => print!("{} ", "Long".bold().green()),
         Action::Short => println!("{} ", "Short".bold().red()),
     }
-    println!("{}", position.name.bold());
+    print!("{} ", position.name.bold());
+
+    // TODO: Move edited at time to user's local
+    println!(
+        "{}{}",
+        "Last edited at ".bold().bright_black(),
+        position
+            .edited_at
+            .to_utc()
+            .format("%d/%m/%Y %H:%M")
+            .to_string()
+            .bold()
+            .bright_black()
+    );
+
     position_table.printstd();
 
     println!(); // Gap between tables
