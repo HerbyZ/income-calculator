@@ -100,6 +100,11 @@ impl Position {
 
         Ok(())
     }
+
+    pub fn calculate_income_percent(&self) -> f64 {
+        // TODO: Calculate position income percent
+        0f64
+    }
 }
 
 #[cfg(test)]
@@ -119,22 +124,8 @@ mod tests {
 
         let mut position = Position::new(0, String::from("MOCK"), vec![first_order]);
 
-        position.add_order(Order {
-            id: 1,
-            action: Action::Long,
-            amount: 10f64,
-            value: 50f64,
-            price: 5f64,
-            income: 0f64,
-        });
-        position.add_order(Order {
-            id: 2,
-            action: Action::Short,
-            amount: 10f64,
-            value: 50f64,
-            price: 5f64,
-            income: 5f64,
-        });
+        position.add_order(Order::new(&position, Action::Long, 10f64, 50f64));
+        position.add_order(Order::new(&position, Action::Short, 10f64, 50f64));
 
         /*
         After adding these orders, 'amount' should be equal to initial;
@@ -188,5 +179,60 @@ mod tests {
         assert_eq!(position.avg_value, 150f64);
         assert_eq!(position.avg_price, 7.5f64);
         assert_eq!(position.income, 0f64);
+    }
+
+    #[test]
+    fn test_position_calculate_income_percent() {
+        // Test positive income
+        let position = Position::new(
+            1,
+            String::from("MOCK"),
+            vec![
+                Order {
+                    id: 0,
+                    action: Action::Long,
+                    amount: 1f64,
+                    value: 100f64,
+                    price: 100f64,
+                    income: 0f64,
+                },
+                Order {
+                    id: 1,
+                    action: Action::Short,
+                    amount: 1f64,
+                    value: 200f64,
+                    price: 200f64,
+                    income: 100f64,
+                },
+            ],
+        );
+
+        assert_eq!(position.calculate_income_percent(), 100f64);
+
+        // Test negative income
+        let position = Position::new(
+            1,
+            String::from("MOCK"),
+            vec![
+                Order {
+                    id: 0,
+                    action: Action::Long,
+                    amount: 1f64,
+                    value: 200f64,
+                    price: 200f64,
+                    income: 0f64,
+                },
+                Order {
+                    id: 1,
+                    action: Action::Short,
+                    amount: 1f64,
+                    value: 100f64,
+                    price: 100f64,
+                    income: 100f64,
+                },
+            ],
+        );
+
+        assert_eq!(position.calculate_income_percent(), -50f64);
     }
 }

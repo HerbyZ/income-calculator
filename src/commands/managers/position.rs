@@ -71,7 +71,7 @@ impl PositionCommandManager {
             Err(error) => return CommandResult::Error(error),
         };
 
-        let order = Order::new(self.position.clone(), action, amount, value);
+        let order = Order::new(&self.position, action, amount, value);
         self.position.add_order(order);
 
         if let Err(error) = storage::save_position(self.position.clone()) {

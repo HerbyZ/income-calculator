@@ -53,7 +53,7 @@ impl ToModel<Position> for PositionStorageModel {
             };
 
             pos.add_order(Order::new(
-                pos.clone(),
+                &pos,
                 action,
                 order_models.amount,
                 order_models.value,
