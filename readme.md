@@ -41,7 +41,7 @@ If you want to change the path of __storage.json__ file, you have to run app for
 ```json
 {
     ...,
-    "options_file_path": "/home/username/.config/income-calculator/storage.json"
+    "storage_file_path": "/home/username/.config/income-calculator/storage.json"
 }
 ```
 
@@ -50,6 +50,7 @@ __Note, that file will be created automatically, but directory should exist befo
 Changes in __options.json__ do not require rebuilding the application.
 
 ### Available options
-* POSITIONS_PER_PAGE: amount of positions that will be shown on a single page
-* ORDERS_PER_PAGE: same as previous but affects orders
-* STORAGE_FILE_PATH: path, where app will create and look for the file with saved data about positions and sorting.
+* `hide_closed_positions` __bool__: should app hide closed positions or show them as closed in list; 
+* `positions_per_page` __uint__: amount of positions that will be shown on a single page;
+* `orders_per_page` __uint__: same as previous but affects orders;
+* `storage_file_path` __string__: path, where app will create and look for the file with saved data about positions and sorting.
