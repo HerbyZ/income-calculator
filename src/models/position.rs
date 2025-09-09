@@ -102,8 +102,27 @@ impl Position {
     }
 
     pub fn calculate_income_percent(&self) -> f64 {
-        // TODO: Calculate position income percent
-        0f64
+        let other_action_orders: Vec<&Order> = self
+            .orders
+            .iter()
+            .filter(|order| order.action != self.action)
+            .collect();
+
+        if other_action_orders.len() < 1 {
+            return 0f64;
+        }
+
+        let mut invested_funds = 0f64;
+        self.orders
+            .iter()
+            .filter(|order| order.action == self.action)
+            .for_each(|order| {
+                if order.action == self.action {
+                    invested_funds += order.value;
+                }
+            });
+
+        self.income / invested_funds * 100f64
     }
 }
 
