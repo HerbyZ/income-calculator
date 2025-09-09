@@ -37,7 +37,7 @@ pub fn render_positions_table(positions: &Vec<Position>, page: i32) {
             cell!(round(position.avg_price).unwrap()),
             get_styled_income_cell(round(position.income).unwrap(), None),
             get_styled_income_cell(
-                round(position.calculate_income_percent()).unwrap(),
+                round::round(position.calculate_income_percent(), 2),
                 Some(String::from("%")),
             ),
             get_status_cell(position),
