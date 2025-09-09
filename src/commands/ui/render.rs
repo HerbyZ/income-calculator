@@ -192,13 +192,11 @@ pub fn render_position_info(position: &Position, page: i32) {
     }
     print!("{} ", position.name.bold());
 
-    // TODO: Move edited at time to user's local
     println!(
         "{}{}",
         "Last edited at ".bold().bright_black(),
         position
             .edited_at
-            .to_utc()
             .format("%d/%m/%Y %H:%M")
             .to_string()
             .bold()

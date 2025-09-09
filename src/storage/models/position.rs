@@ -1,4 +1,4 @@
-use chrono::{DateTime, Utc};
+use chrono::{DateTime, Local};
 use serde::{Deserialize, Serialize};
 
 use crate::models::{Order, Position};
@@ -12,8 +12,8 @@ pub struct PositionStorageModel {
     pub name: String,
     pub orders: Vec<OrderStorageModel>,
 
-    #[serde(default = "Utc::now")]
-    pub edited_at: DateTime<Utc>,
+    #[serde(default = "Local::now")]
+    pub edited_at: DateTime<Local>,
 }
 
 impl ToModel<Position> for PositionStorageModel {
