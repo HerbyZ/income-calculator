@@ -11,7 +11,7 @@ pub struct Order {
 }
 
 impl Order {
-    pub fn new(pos: Position, action: Action, amount: f64, value: f64) -> Order {
+    pub fn new(pos: &Position, action: Action, amount: f64, value: f64) -> Order {
         let price = value / amount;
         let income = (price - pos.avg_price) * amount;
 
@@ -47,7 +47,7 @@ mod tests {
         let pos = Position::new(0, String::from("MOCK"), vec![manual_order]);
 
         // Create order with Order::new()
-        let order = Order::new(pos, Action::Short, 10f64, 200f64);
+        let order = Order::new(&pos, Action::Short, 10f64, 200f64);
         assert_eq!(order.id, 1);
         assert_eq!(order.price, 20f64);
         assert_eq!(order.income, 100f64);

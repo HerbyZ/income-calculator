@@ -3,7 +3,7 @@ pub mod utils;
 
 mod ui;
 
-use chrono::Utc;
+use chrono::Local;
 use managers::{GlobalCommandManager, PositionCommandManager};
 
 use crate::{exit_with_error, Position};
@@ -120,7 +120,7 @@ impl CommandHandler {
                     .expect("get index of changed position");
 
                 let mut pos = position.clone();
-                pos.edited_at = Utc::now();
+                pos.edited_at = Local::now();
 
                 self.positions[index] = pos;
                 self.global_handler = GlobalCommandManager::new(&self.positions);

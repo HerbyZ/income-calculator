@@ -1,12 +1,13 @@
 use colored::Colorize;
 
 use super::super::utils::commands::parse_arg_or_get_from_input;
-use super::super::utils::sorting::{get_sorted_positions, SortBy, SortDirection};
+use super::super::utils::sorting::{SortBy, SortDirection};
 use super::super::ChangeEditMode;
 use super::super::CommandResult;
 use crate::commands::ui::render;
-use crate::constants::POISITIONS_PER_PAGE;
+use crate::commands::utils::sorting::PositionsSorter;
 use crate::models::{Action, Order, Position};
+use crate::options::get_options;
 use crate::storage::{load_storage, update_storage};
 use crate::utils::console::{
     ask_confirmation, ask_for_input, clear_screen, wait_for_enter, ConfirmationStatus,
@@ -16,16 +17,21 @@ use crate::{exit_with_error, storage};
 
 pub struct GlobalCommandManager {
     positions: Vec<Position>,
-    sort_by: SortBy,
+    sorter: PositionsSorter,
     page: i32,
 }
 
 impl GlobalCommandManager {
     pub fn new(initial_positions: &Vec<Position>) -> GlobalCommandManager {
         let storage = load_storage().expect("load storage");
+        let options = get_options();
         GlobalCommandManager {
             positions: initial_positions.to_vec(),
-            sort_by: storage.sort_positions_by,
+            sorter: PositionsSorter {
+                sort_by: storage.sort_positions_by,
+                hide_closed: options.hide_closed_positions,
+                move_closed_to_bottom: storage.move_closed_positions_to_bottom,
+            },
             page: 1,
         }
     }
@@ -48,7 +54,7 @@ impl GlobalCommandManager {
     }
 
     pub fn show_ui(&self) {
-        let sorted_positions = get_sorted_positions(&self.positions, &self.sort_by);
+        let sorted_positions = self.sorter.sort(&self.positions);
         render::render_positions_table(&sorted_positions, self.page);
         render::render_help_tooltip();
     }
@@ -104,7 +110,8 @@ impl GlobalCommandManager {
     }
 
     fn handle_next_page(&mut self) -> CommandResult {
-        let max_page = get_pages_count(self.positions.len(), POISITIONS_PER_PAGE);
+        let positions_per_page = get_options().positions_per_page;
+        let max_page = get_pages_count(self.positions.len(), positions_per_page);
         if (self.page + 1) as f64 > max_page {
             CommandResult::Error(String::from("Already at last page"))
         } else {
@@ -195,21 +202,51 @@ impl GlobalCommandManager {
     fn handle_change_sorting(&mut self) -> CommandResult {
         clear_screen().expect("clear screen");
 
-        println!("{}", "Awailable sorting methods: ".bold());
+        println!(
+            "Current sorting method: {}",
+            self.sorter.sort_by.to_string().yellow()
+        );
+
+        println!();
+
+        println!("{}", "Available sorting methods: ".bold());
         println!("{}{}", "1".yellow(), ". By id");
         println!("{}{}", "2".yellow(), ". By avg value");
         println!("{}{}", "3".yellow(), ". By avg price");
         println!("{}{}", "4".yellow(), ". By income");
         println!("{}{}", "5".yellow(), ". By last change");
 
+        println!();
+
+        println!(
+            "{}{} ({})",
+            "cb".yellow(),
+            " - Move closed positions to bottom",
+            match self.sorter.move_closed_to_bottom {
+                true => "enabled",
+                false => "disabled",
+            }
+        );
         println!("{}{}", "q".yellow(), " - Exit");
 
-        let choice = match ask_for_input::<String>("\nChoose the number of preffered sorting:") {
+        let choice = match ask_for_input::<String>("\nChoose the number of preferred sorting:") {
             Ok(answer) => answer.to_lowercase(),
             Err(error) => return CommandResult::Error(error),
         };
 
         if choice.trim() == "q" {
+            return CommandResult::Ok;
+        }
+
+        if choice.trim() == "cb" {
+            self.sorter.move_closed_to_bottom = !self.sorter.move_closed_to_bottom;
+
+            if let Err(error) = update_storage(|storage| {
+                storage.move_closed_positions_to_bottom = self.sorter.move_closed_to_bottom
+            }) {
+                return CommandResult::Error(error);
+            }
+
             return CommandResult::Ok;
         }
 
@@ -229,7 +266,7 @@ impl GlobalCommandManager {
             }
         };
 
-        self.sort_by = match choice.trim() {
+        self.sorter.sort_by = match choice.trim() {
             "1" => SortBy::Id(direction),
             "2" => SortBy::AvgValue(direction),
             "3" => SortBy::AvgPrice(direction),
@@ -240,7 +277,9 @@ impl GlobalCommandManager {
             }
         };
 
-        if let Err(error) = update_storage(|storage| storage.sort_positions_by = self.sort_by) {
+        if let Err(error) =
+            update_storage(|storage| storage.sort_positions_by = self.sorter.sort_by)
+        {
             return CommandResult::Error(error);
         }
 

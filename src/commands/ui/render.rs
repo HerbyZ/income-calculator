@@ -1,8 +1,9 @@
 use colored::Colorize;
 use prettytable::{cell, color, row, Attr, Cell, Row, Table};
+use std::cmp::Ordering;
 
-use crate::constants::{ORDERS_PER_PAGE, POISITIONS_PER_PAGE};
 use crate::models::{Action, Order, Position};
+use crate::options::get_options;
 use crate::utils::console::clear_screen;
 use crate::utils::math::round;
 use crate::utils::pagination::{draw_page_counter, get_pages_count, select_items_for_page};
@@ -17,13 +18,15 @@ pub fn render_positions_table(positions: &Vec<Position>, page: i32) {
         "Avg value",
         "Avg price",
         "Income",
+        "%",
         "Status"
     ]);
 
     let mut reversed_positions = positions.to_vec();
     reversed_positions.reverse();
 
-    let positions_to_draw = select_items_for_page(reversed_positions, page, POISITIONS_PER_PAGE);
+    let positions_per_page = get_options().positions_per_page;
+    let positions_to_draw = select_items_for_page(reversed_positions, page, positions_per_page);
 
     positions_to_draw.iter().for_each(|position| {
         table.add_row(Row::new(vec![
@@ -32,7 +35,11 @@ pub fn render_positions_table(positions: &Vec<Position>, page: i32) {
             cell!(round(position.amount).unwrap()),
             cell!(round(position.avg_value).unwrap()),
             cell!(round(position.avg_price).unwrap()),
-            get_styled_income_sell(round(position.income).unwrap()),
+            get_styled_income_cell(round(position.income).unwrap(), None),
+            get_styled_income_cell(
+                round::round(position.calculate_income_percent(), 2),
+                Some(String::from("%")),
+            ),
             get_status_cell(position),
         ]));
     });
@@ -45,12 +52,13 @@ pub fn render_positions_table(positions: &Vec<Position>, page: i32) {
         cell!("-"),
         cell!(round(value).unwrap()),
         cell!("-"),
-        get_styled_income_sell(round(income).unwrap()),
+        get_styled_income_cell(round(income).unwrap(), None),
         cell!("-"),
     ]));
 
     table.printstd();
-    draw_page_counter(page, get_pages_count(positions.len(), POISITIONS_PER_PAGE));
+
+    draw_page_counter(page, get_pages_count(positions.len(), positions_per_page));
 }
 
 pub fn render_help_tooltip() {
@@ -120,7 +128,7 @@ pub fn render_single_position(position: &Position) {
         cell!(round(position.amount).unwrap()),
         cell!(round(position.avg_value).unwrap()),
         cell!(round(position.avg_price).unwrap()),
-        get_styled_income_sell(round(position.income).unwrap()),
+        get_styled_income_cell(round(position.income).unwrap(), None),
     ]));
 
     table.printstd();
@@ -143,14 +151,17 @@ pub fn render_position_info(position: &Position, page: i32) {
         cell!(round(position.amount).unwrap()),
         cell!(round(position.avg_value).unwrap()),
         cell!(round(position.avg_price).unwrap()),
-        get_styled_income_sell(round(position.income).unwrap()),
+        get_styled_income_cell(round(position.income).unwrap(), None),
     ]));
 
     let mut orders_table = Table::new();
 
     orders_table.add_row(row!["Id", "Type", "Amount", "Value", "Price", "Income"]);
 
-    position.orders.iter().for_each(|order| {
+    let orders_per_page = get_options().orders_per_page;
+    let orders_to_draw = select_items_for_page(position.orders.clone(), page, orders_per_page);
+
+    orders_to_draw.iter().for_each(|order| {
         let order_type = match order.action {
             Action::Long => "Buy",
             Action::Short => "Sell",
@@ -159,7 +170,7 @@ pub fn render_position_info(position: &Position, page: i32) {
         let income_cell = if position.action == order.action {
             cell!(String::from("-"))
         } else {
-            get_styled_income_sell(round(order.income).unwrap())
+            get_styled_income_cell(round(order.income).unwrap(), None)
         };
 
         orders_table.add_row(Row::new(vec![
@@ -179,16 +190,29 @@ pub fn render_position_info(position: &Position, page: i32) {
         Action::Long => print!("{} ", "Long".bold().green()),
         Action::Short => println!("{} ", "Short".bold().red()),
     }
-    println!("{}", position.name.bold());
+    print!("{} ", position.name.bold());
+
+    println!(
+        "{}{}",
+        "Last edited at ".bold().bright_black(),
+        position
+            .edited_at
+            .format("%d/%m/%Y %H:%M")
+            .to_string()
+            .bold()
+            .bright_black()
+    );
+
     position_table.printstd();
 
     println!(); // Gap between tables
 
     println!("Position {} orders:", position.id.to_string().bold());
     orders_table.printstd();
+
     draw_page_counter(
         page,
-        get_pages_count(position.orders.len(), ORDERS_PER_PAGE),
+        get_pages_count(position.orders.len(), orders_per_page),
     );
 }
 
@@ -201,7 +225,7 @@ pub fn render_single_order(position: &Position, order: &Order) {
     let income_cell = if position.action == order.action {
         cell!(String::from("-"))
     } else {
-        get_styled_income_sell(round(order.income).unwrap())
+        get_styled_income_cell(round(order.income).unwrap(), None)
     };
 
     let mut table = Table::new();
@@ -231,13 +255,18 @@ fn calculate_total(positions: &Vec<Position>) -> (f64, f64) {
     (value, income)
 }
 
-fn get_styled_income_sell(income: f64) -> Cell {
+fn get_styled_income_cell(income: f64, postfix: Option<String>) -> Cell {
+    let cell_value = match postfix {
+        Some(postfix) => format!("{}{}", income, postfix),
+        None => income.to_string(),
+    };
+
     match income.total_cmp(&0f64) {
-        std::cmp::Ordering::Equal => cell!(income),
-        std::cmp::Ordering::Greater => {
-            cell!(format!("+{}", income)).with_style(Attr::ForegroundColor(color::GREEN))
+        Ordering::Equal => cell!(cell_value),
+        Ordering::Greater => {
+            cell!(format!("+{}", cell_value)).with_style(Attr::ForegroundColor(color::GREEN))
         }
-        std::cmp::Ordering::Less => cell!(income).with_style(Attr::ForegroundColor(color::RED)),
+        Ordering::Less => cell!(cell_value).with_style(Attr::ForegroundColor(color::RED)),
     }
 }
 

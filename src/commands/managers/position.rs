@@ -1,8 +1,8 @@
 use super::super::utils::commands::parse_arg_or_get_from_input;
 use super::super::ChangeEditMode;
 use crate::commands::ui::render;
-use crate::constants::ORDERS_PER_PAGE;
 use crate::models::{Action, Order, Position};
+use crate::options::get_options;
 use crate::utils::console::{ask_confirmation, ask_for_input, wait_for_enter, ConfirmationStatus};
 use crate::utils::pagination::get_pages_count;
 use crate::{exit_with_error, storage};
@@ -53,8 +53,16 @@ impl PositionCommandManager {
             Err(error) => return CommandResult::Error(error),
         };
 
-        let amount = match ask_for_input::<f64>("Enter position amount") {
-            Ok(value) => value,
+        let amount = match ask_for_input::<f64>(
+            "Enter position amount.\nEnter 0 if you're fully closing position.",
+        ) {
+            Ok(value) => {
+                if value == 0f64 {
+                    self.position.amount
+                } else {
+                    value
+                }
+            }
             Err(error) => return CommandResult::Error(error),
         };
 
@@ -63,7 +71,7 @@ impl PositionCommandManager {
             Err(error) => return CommandResult::Error(error),
         };
 
-        let order = Order::new(self.position.clone(), action, amount, value);
+        let order = Order::new(&self.position, action, amount, value);
         self.position.add_order(order);
 
         if let Err(error) = storage::save_position(self.position.clone()) {
@@ -124,7 +132,8 @@ impl PositionCommandManager {
     }
 
     fn handle_next_page(&mut self) -> CommandResult {
-        let max_page = get_pages_count(self.position.orders.len(), ORDERS_PER_PAGE);
+        let orders_per_page = get_options().orders_per_page;
+        let max_page = get_pages_count(self.position.orders.len(), orders_per_page);
         if (self.page + 1) as f64 > max_page {
             CommandResult::Error(String::from("Already at last page"))
         } else {

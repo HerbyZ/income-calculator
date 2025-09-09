@@ -1,6 +1,7 @@
 pub mod commands;
 pub mod constants;
 pub mod models;
+pub mod options;
 pub mod storage;
 pub mod utils;
 
@@ -16,8 +17,8 @@ fn exit_with_error(error: String) -> ! {
 fn handle_load_initial_positions_error(error: String) -> Vec<Position> {
     print_error(error);
     let confirmation_message =
-"Perhaps, the version of app has changed. You can reinit storage (all data will be lost) or 
-try to fix data in file yourself\ny - Reitinitalize storage\nn - Exit without changes\n(Default: n)";
+"Perhaps, the version of app has changed. You can reinitialize storage (all data will be lost) or 
+try to fix data in file yourself\ny - Reinitialize storage\nn - Exit without changes\n(Default: n)";
     let confirmation_status =
         match ask_confirmation(confirmation_message, ConfirmationStatus::Rejected) {
             Ok(value) => value,
@@ -39,6 +40,10 @@ try to fix data in file yourself\ny - Reitinitalize storage\nn - Exit without ch
 }
 
 fn main() {
+    if let Err(error) = options::initialize_options() {
+        exit_with_error(error);
+    }
+
     if let Err(error) = storage::initialize_storage() {
         exit_with_error(error);
     }

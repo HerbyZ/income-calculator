@@ -8,36 +8,43 @@ pub use positions::{load_positions, save_position, save_positions};
 use std::path::Path;
 
 use crate::commands::utils::sorting::SortBy;
-use crate::constants::STORAGE_FILE_PATH;
 use crate::models::Position;
+use crate::options::get_options;
 
 pub struct Storage {
     pub sort_positions_by: SortBy,
+    pub move_closed_positions_to_bottom: bool,
     pub positions: Vec<Position>,
 }
 
 const DEFAULT_STORAGE_FILE_CONTENT: &str = "{ positions: [] }";
 
 pub fn initialize_storage() -> Result<(), String> {
-    if Path::new(STORAGE_FILE_PATH).exists() {
+    let storage_file_path = get_options().storage_file_path;
+
+    if Path::new(&storage_file_path).exists() {
         return Ok(());
     };
 
-    match std::fs::write(STORAGE_FILE_PATH, DEFAULT_STORAGE_FILE_CONTENT) {
+    match std::fs::write(storage_file_path, DEFAULT_STORAGE_FILE_CONTENT) {
         Ok(_) => Ok(()),
         Err(_) => Err(String::from("Failed to write initial storage file")),
     }
 }
 
 pub fn reinitialize_storage() -> Result<(), String> {
-    match std::fs::write(STORAGE_FILE_PATH, DEFAULT_STORAGE_FILE_CONTENT) {
+    let storage_file_path = get_options().storage_file_path;
+
+    match std::fs::write(storage_file_path, DEFAULT_STORAGE_FILE_CONTENT) {
         Ok(_) => Ok(()),
         Err(_) => Err(String::from("Failed to write initial storage file")),
     }
 }
 
 pub fn load_storage() -> Result<Storage, String> {
-    let file_content = match std::fs::read_to_string(STORAGE_FILE_PATH) {
+    let storage_file_path = get_options().storage_file_path;
+
+    let file_content = match std::fs::read_to_string(storage_file_path) {
         Ok(content) => content,
         Err(_) => return Err(String::from("Failed to read storage file")),
     };
@@ -66,7 +73,8 @@ where
         Err(_) => return Err(String::from("Failed to serialize positions to json")),
     };
 
-    match std::fs::write(STORAGE_FILE_PATH, json_string) {
+    let storage_file_path = get_options().storage_file_path;
+    match std::fs::write(storage_file_path, json_string) {
         Ok(_) => Ok(()),
         Err(_) => Err(String::from("Failed to save positions to storage file")),
     }
