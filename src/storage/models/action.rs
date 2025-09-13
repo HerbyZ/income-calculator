@@ -18,6 +18,7 @@ impl ToModel<Action> for ActionStorageModel {
         }
     }
 }
+
 impl FromModel<Action> for ActionStorageModel {
     fn from_model(model: Action) -> ActionStorageModel {
         match model {

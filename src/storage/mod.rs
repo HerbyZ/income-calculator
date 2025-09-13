@@ -17,7 +17,7 @@ pub struct Storage {
     pub positions: Vec<Position>,
 }
 
-const DEFAULT_STORAGE_FILE_CONTENT: &str = "{ positions: [] }";
+const DEFAULT_STORAGE_FILE_CONTENT: &str = "{ \"positions\": [], \"sort_positions_by\": { \"LastChange\": \"A\" }, \"move_closed_positions_to_bottom\": false }";
 
 pub fn initialize_storage() -> Result<(), String> {
     let storage_file_path = get_options().storage_file_path;
